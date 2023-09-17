@@ -28,5 +28,8 @@ func main() {
 		panic(err)
 	}
 
-	hina.WalkTree(jsonContent)
+	err = hina.WalkTree(jsonContent)
+	if err != nil {
+		panic(err)
+	}
 }

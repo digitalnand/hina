@@ -5,51 +5,79 @@ import (
 	"strconv"
 )
 
-func inspectTerm(node map[string]interface{}, nodeValue *any) {
+func inspectTerm(node map[string]interface{}, nodeValue *any) error {
 	kind := node["kind"]
 	value := fmt.Sprint(node["value"])
+
 	switch kind {
 	case "Str":
-		var strNode StrNode
-		strNode.Value = value
-		*nodeValue = strNode
+		*nodeValue = StrNode{Value: value}
 	case "Int":
-		var intNode IntNode
 		num, err := strconv.Atoi(value)
 		if err != nil {
-			panic(err)
+			return err
 		}
-		intNode.Value = int32(num)
-		*nodeValue = intNode
+		*nodeValue = IntNode{Value: int32(num)}
 	case "Bool":
-		var boolNode BoolNode
 		boolValue, err := strconv.ParseBool(value)
 		if err != nil {
-			panic(err)
+			return err
 		}
-		boolNode.Value = boolValue
-		*nodeValue = boolNode
+		*nodeValue = BoolNode{Value: boolValue}
 	case "Print":
-		printNode := inspectPrint(node)
+		printNode, err := inspectPrint(node)
+		if err != nil {
+			return err
+		}
 		*nodeValue = printNode
+	default:
+		return fmt.Errorf("unknown term: %s", kind)
 	}
+
+	return nil
 }
 
-func inspectPrint(node map[string]interface{}) PrintNode {
+func inspectNode(node map[string]interface{}) error {
+	kind := node["kind"]
+	switch kind {
+	case "Print":
+		printNode, err := inspectPrint(node)
+		if err != nil {
+			return err
+		}
+		printNode.Evaluate()
+	default:
+		return fmt.Errorf("unknown node: %s", kind)
+	}
+	return nil
+}
+
+func inspectPrint(node map[string]interface{}) (PrintNode, error) {
+	value := node["value"].(map[string]interface{})
 	var printNode PrintNode
-	value := node["value"]
-	inspectTerm(value.(map[string]interface{}), &printNode.Value)
-	return printNode
+	err := inspectTerm(value, &printNode.Value)
+	if err != nil {
+		return PrintNode{}, err
+	}
+	return printNode, nil
 }
 
-func WalkTree(tree map[string]interface{}) {
-	expressionNode, hasExpressionNode := tree["expression"]
-	expression, hasExpression := expressionNode.(map[string]interface{})
-	if !hasExpressionNode || !hasExpression || len(expression) < 1 {
-		panic("tree has no expressions")
+func getExpression(tree map[string]interface{}) (map[string]interface{}, bool) {
+	expression, ok := tree["expression"].(map[string]interface{})
+	if !ok || len(expression) < 1 {
+		return nil, false
 	}
+	return expression, true
+}
 
-	if expression["kind"] == "Print" {
-		inspectPrint(expression).Evaluate()
+func WalkTree(tree map[string]interface{}) error {
+	expression, ok := getExpression(tree)
+	if !ok {
+		return fmt.Errorf("tree has no expressions")
 	}
+	err := inspectNode(expression)
+	if err != nil {
+		return err
+	}
+	return nil
 }
