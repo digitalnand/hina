@@ -1,0 +1,41 @@
+{
+  "name": "files/print.rinha",
+  "expression": {
+    "kind": "Print",
+    "value": {
+      "kind": "Print",
+      "value": {
+        "kind": "Print",
+        "value": {
+          "kind": "Str",
+          "value": "Hello hina!",
+          "location": {
+            "start": 18,
+            "end": 31,
+            "filename": "files/print.rinha"
+          }
+        },
+        "location": {
+          "start": 12,
+          "end": 32,
+          "filename": "files/print.rinha"
+        }
+      },
+      "location": {
+        "start": 6,
+        "end": 33,
+        "filename": "files/print.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 34,
+      "filename": "files/print.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 34,
+    "filename": "files/print.rinha"
+  }
+}

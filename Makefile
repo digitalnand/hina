@@ -2,7 +2,7 @@ GO := go
 
 MAIN_FILE := cmd/hina/main.go
 
-all: main
+all: build
 
-main: 
-	$(GO) run $(MAIN_FILE)
+build: 
+	$(GO) build -o hina $(MAIN_FILE)
