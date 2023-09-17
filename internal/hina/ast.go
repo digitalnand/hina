@@ -26,10 +26,12 @@ func (node BoolNode) String() string {
 	return fmt.Sprintf("%t", node.Value)
 }
 
-type PrintNode struct {
-	Value any
+type BinaryNode struct {
+	Lhs any
+	Op  string
+	Rhs any
 }
 
-func (node PrintNode) String() string {
-	return fmt.Sprintf("%s", node.Value)
+type PrintNode struct {
+	Value any
 }

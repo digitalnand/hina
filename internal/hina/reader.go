@@ -5,61 +5,73 @@ import (
 	"strconv"
 )
 
-func inspectTerm(node map[string]interface{}, nodeValue *any) error {
+func inspectTerm(node map[string]interface{}) (any, error) {
 	kind := node["kind"]
 	value := fmt.Sprint(node["value"])
 
 	switch kind {
 	case "Str":
-		*nodeValue = StrNode{Value: value}
+		return StrNode{Value: value}, nil
 	case "Int":
 		num, err := strconv.Atoi(value)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		*nodeValue = IntNode{Value: int32(num)}
+		return IntNode{Value: int32(num)}, nil
 	case "Bool":
 		boolValue, err := strconv.ParseBool(value)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		*nodeValue = BoolNode{Value: boolValue}
+		return BoolNode{Value: boolValue}, nil
 	case "Print":
 		printNode, err := inspectPrint(node)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		*nodeValue = printNode
+		return printNode.Evaluate(), nil
+	case "Binary":
+		binaryNode, inspectErr := inspectBinary(node)
+		if inspectErr != nil {
+			return nil, inspectErr
+		}
+		resultNode, resultErr := binaryNode.Evaluate()
+		if resultErr != nil {
+			return nil, resultErr
+		}
+		return resultNode, nil
 	default:
-		return fmt.Errorf("unknown term: %s", kind)
+		return nil, fmt.Errorf("unknown term: %s", kind)
 	}
-
-	return nil
 }
 
-func inspectNode(node map[string]interface{}) error {
-	kind := node["kind"]
-	switch kind {
-	case "Print":
-		printNode, err := inspectPrint(node)
-		if err != nil {
-			return err
-		}
-		printNode.Evaluate()
-	default:
-		return fmt.Errorf("unknown node: %s", kind)
+func inspectBinary(node map[string]interface{}) (BinaryNode, error) {
+	op, hasOp := node["op"]
+	lhsNode, hasLhs := node["lhs"].(map[string]interface{})
+	rhsNode, hasRhs := node["rhs"].(map[string]interface{})
+	if !hasOp || !hasLhs || !hasRhs {
+		return BinaryNode{}, fmt.Errorf("binary node is badly structured")
 	}
-	return nil
+
+	lhs, lhsErr := inspectTerm(lhsNode)
+	if lhsErr != nil {
+		return BinaryNode{}, lhsErr
+	}
+	rhs, rhsErr := inspectTerm(rhsNode)
+	if rhsErr != nil {
+		return BinaryNode{}, rhsErr
+	}
+
+	return BinaryNode{Lhs: lhs, Op: fmt.Sprint(op), Rhs: rhs}, nil
 }
 
 func inspectPrint(node map[string]interface{}) (PrintNode, error) {
 	value := node["value"].(map[string]interface{})
-	var printNode PrintNode
-	err := inspectTerm(value, &printNode.Value)
+	termNode, err := inspectTerm(value)
 	if err != nil {
 		return PrintNode{}, err
 	}
-	return printNode, nil
+	return PrintNode{Value: termNode}, nil
 }
 
 func getExpression(tree map[string]interface{}) (map[string]interface{}, bool) {
@@ -75,7 +87,7 @@ func WalkTree(tree map[string]interface{}) error {
 	if !ok {
 		return fmt.Errorf("tree has no expressions")
 	}
-	err := inspectNode(expression)
+	_, err := inspectTerm(expression)
 	if err != nil {
 		return err
 	}
