@@ -54,3 +54,9 @@ type VarNode struct {
 type PrintNode struct {
 	Value any
 }
+
+type IfNode struct {
+	Condition BoolNode
+	Then      any
+	Else      any
+}

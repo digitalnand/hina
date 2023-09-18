@@ -1,0 +1,6 @@
+let x = if (3 * 2 == 6) {
+            true
+        } else {
+            false
+        };
+print(x)

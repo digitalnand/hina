@@ -1,0 +1,112 @@
+{
+  "name": "files/if.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "x",
+      "location": {
+        "start": 4,
+        "end": 5,
+        "filename": "files/if.rinha"
+      }
+    },
+    "value": {
+      "kind": "If",
+      "condition": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Binary",
+          "lhs": {
+            "kind": "Int",
+            "value": 3,
+            "location": {
+              "start": 12,
+              "end": 13,
+              "filename": "files/if.rinha"
+            }
+          },
+          "op": "Mul",
+          "rhs": {
+            "kind": "Int",
+            "value": 2,
+            "location": {
+              "start": 16,
+              "end": 17,
+              "filename": "files/if.rinha"
+            }
+          },
+          "location": {
+            "start": 12,
+            "end": 17,
+            "filename": "files/if.rinha"
+          }
+        },
+        "op": "Eq",
+        "rhs": {
+          "kind": "Int",
+          "value": 6,
+          "location": {
+            "start": 21,
+            "end": 22,
+            "filename": "files/if.rinha"
+          }
+        },
+        "location": {
+          "start": 12,
+          "end": 22,
+          "filename": "files/if.rinha"
+        }
+      },
+      "then": {
+        "kind": "Bool",
+        "value": true,
+        "location": {
+          "start": 38,
+          "end": 42,
+          "filename": "files/if.rinha"
+        }
+      },
+      "otherwise": {
+        "kind": "Bool",
+        "value": false,
+        "location": {
+          "start": 72,
+          "end": 77,
+          "filename": "files/if.rinha"
+        }
+      },
+      "location": {
+        "start": 8,
+        "end": 87,
+        "filename": "files/if.rinha"
+      }
+    },
+    "next": {
+      "kind": "Print",
+      "value": {
+        "kind": "Var",
+        "text": "x",
+        "location": {
+          "start": 95,
+          "end": 96,
+          "filename": "files/if.rinha"
+        }
+      },
+      "location": {
+        "start": 89,
+        "end": 97,
+        "filename": "files/if.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 97,
+      "filename": "files/if.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 97,
+    "filename": "files/if.rinha"
+  }
+}

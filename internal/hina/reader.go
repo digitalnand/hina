@@ -80,9 +80,43 @@ func inspectTerm(node map[string]interface{}) (any, error) {
 			return nil, err
 		}
 		return tupleFunction, nil
+	case "If":
+		ifNode, err := inspectIf(node)
+		if err != nil {
+			return nil, err
+		}
+		return ifNode.Evaluate(), nil
 	default:
 		return nil, fmt.Errorf("unknown term: %s", kind)
 	}
+}
+
+func inspectIf(node map[string]interface{}) (IfNode, error) {
+	conditionNode, hasCondition := node["condition"].(map[string]interface{})
+	thenNode, hasThen := node["then"].(map[string]interface{})
+	elseNode, hasElse := node["otherwise"].(map[string]interface{})
+	if !hasCondition || !hasThen || !hasElse {
+		return IfNode{}, fmt.Errorf("'If' node is badly structured")
+	}
+
+	condition, conditionErr := inspectTerm(conditionNode)
+	if conditionErr != nil {
+		return IfNode{}, conditionErr
+	}
+	conditionBool, isBool := condition.(BoolNode)
+	if !isBool {
+		return IfNode{}, fmt.Errorf("'If' only accepts Bools as condition")
+	}
+	then, thenErr := inspectTerm(thenNode)
+	if thenErr != nil {
+		return IfNode{}, thenErr
+	}
+	elseTerm, elseErr := inspectTerm(elseNode)
+	if elseErr != nil {
+		return IfNode{}, elseErr
+	}
+
+	return IfNode{Condition: conditionBool, Then: then, Else: elseTerm}, nil
 }
 
 func inspectTupleFunction(node map[string]interface{}) (any, error) {

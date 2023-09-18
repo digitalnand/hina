@@ -93,3 +93,11 @@ func (binary BinaryNode) Evaluate() (any, error) {
 		return nil, fmt.Errorf("unknown binary operator: '%s'", binary.Op)
 	}
 }
+
+func (node IfNode) Evaluate() any {
+	condition := node.Condition
+	if condition.Value {
+		return node.Then
+	}
+	return node.Else
+}
