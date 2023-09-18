@@ -141,7 +141,7 @@ func getExpression(tree map[string]interface{}) (map[string]interface{}, error) 
 func WalkTree(tree map[string]interface{}) error {
 	expression, expressionErr := getExpression(tree)
 	if expressionErr != nil {
-		return fmt.Errorf("tree has no expressions")
+		return expressionErr
 	}
 	_, termErr := inspectTerm(expression)
 	if termErr != nil {
