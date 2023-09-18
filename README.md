@@ -4,5 +4,8 @@ hina is a [Rinha](https://github.com/aripiprazole/rinha-de-compiler) [tree-walki
 # goals
 - [x] printing
 - [x] binary ops support
-- [ ] variables support
+- [x] variables support
 - [ ] tuples support
+- [ ] if support
+- [ ] functions support
+- [ ] better error handling 

@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+// TODO: idk if a global symbolTable is a good thing, so improve this
+var (
+	symbolTable = make(map[string]interface{})
+)
+
 func inspectTerm(node map[string]interface{}) (any, error) {
 	kind := node["kind"]
 	value := fmt.Sprint(node["value"])
@@ -40,9 +45,57 @@ func inspectTerm(node map[string]interface{}) (any, error) {
 			return nil, resultErr
 		}
 		return resultNode, nil
+	case "Let":
+		letNode, letErr := inspectLet(node)
+		if letErr != nil {
+			return nil, letErr
+		}
+		symbolTable[letNode.Identifier] = letNode
+
+		_, nextErr := inspectTerm(letNode.Next.(map[string]interface{}))
+		if nextErr != nil {
+			return nil, nextErr
+		}
+		return letNode, nil
+	case "Var":
+		varNode, varErr := inspectVar(node)
+		if varErr != nil {
+			return nil, varErr
+		}
+
+		letNode, hasLet := symbolTable[varNode.Text].(LetNode)
+		if !hasLet {
+			return nil, fmt.Errorf("calling an undeclared variable: %s", varNode.Text)
+		}
+		return letNode.Value, nil
 	default:
 		return nil, fmt.Errorf("unknown term: %s", kind)
 	}
+}
+
+func inspectLet(node map[string]interface{}) (LetNode, error) {
+	nameNode, hasName := node["name"].(map[string]interface{})
+	identifier, hasIdentifier := nameNode["text"].(string)
+	valueNode, hasValue := node["value"].(map[string]interface{})
+	nextNode, hasNext := node["next"].(map[string]interface{})
+	if !hasName || !hasValue || !hasIdentifier || !hasNext {
+		return LetNode{}, fmt.Errorf("'Let' node is badly structured")
+	}
+
+	value, valueErr := inspectTerm(valueNode)
+	if valueErr != nil {
+		return LetNode{}, valueErr
+	}
+
+	return LetNode{Identifier: identifier, Value: value, Next: nextNode}, nil
+}
+
+func inspectVar(node map[string]interface{}) (VarNode, error) {
+	text, hasText := node["text"].(string)
+	if !hasText {
+		return VarNode{}, fmt.Errorf("'Var' node is badly structured")
+	}
+	return VarNode{Text: text}, nil
 }
 
 func inspectBinary(node map[string]interface{}) (BinaryNode, error) {
@@ -50,7 +103,7 @@ func inspectBinary(node map[string]interface{}) (BinaryNode, error) {
 	lhsNode, hasLhs := node["lhs"].(map[string]interface{})
 	rhsNode, hasRhs := node["rhs"].(map[string]interface{})
 	if !hasOp || !hasLhs || !hasRhs {
-		return BinaryNode{}, fmt.Errorf("binary node is badly structured")
+		return BinaryNode{}, fmt.Errorf("'Binary' node is badly structured")
 	}
 
 	lhs, lhsErr := inspectTerm(lhsNode)
@@ -66,7 +119,10 @@ func inspectBinary(node map[string]interface{}) (BinaryNode, error) {
 }
 
 func inspectPrint(node map[string]interface{}) (PrintNode, error) {
-	value := node["value"].(map[string]interface{})
+	value, hasValue := node["value"].(map[string]interface{})
+	if !hasValue {
+		return PrintNode{}, fmt.Errorf("'Print' node is badly structured")
+	}
 	termNode, err := inspectTerm(value)
 	if err != nil {
 		return PrintNode{}, err
@@ -74,22 +130,22 @@ func inspectPrint(node map[string]interface{}) (PrintNode, error) {
 	return PrintNode{Value: termNode}, nil
 }
 
-func getExpression(tree map[string]interface{}) (map[string]interface{}, bool) {
-	expression, ok := tree["expression"].(map[string]interface{})
-	if !ok || len(expression) < 1 {
-		return nil, false
+func getExpression(tree map[string]interface{}) (map[string]interface{}, error) {
+	expression, hasExpression := tree["expression"].(map[string]interface{})
+	if !hasExpression || len(expression) < 1 {
+		return nil, fmt.Errorf("tree has no expressions")
 	}
-	return expression, true
+	return expression, nil
 }
 
 func WalkTree(tree map[string]interface{}) error {
-	expression, ok := getExpression(tree)
-	if !ok {
+	expression, expressionErr := getExpression(tree)
+	if expressionErr != nil {
 		return fmt.Errorf("tree has no expressions")
 	}
-	_, err := inspectTerm(expression)
-	if err != nil {
-		return err
+	_, termErr := inspectTerm(expression)
+	if termErr != nil {
+		return termErr
 	}
 	return nil
 }

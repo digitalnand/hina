@@ -16,20 +16,21 @@ func (binary BinaryNode) Evaluate() (any, error) {
 
 	switch binary.Op {
 	case "Add":
-		_, isLhsString := binary.Lhs.(StrNode)
-		_, isRhsString := binary.Rhs.(StrNode)
-		intLhs, isLhsInt := binary.Lhs.(IntNode)
-		intRhs, isRhsInt := binary.Rhs.(IntNode)
+		// TODO: improve this
+		_, isLhsString := lhs.(StrNode)
+		_, isRhsString := rhs.(StrNode)
+		intLhs, isLhsInt := lhs.(IntNode)
+		intRhs, isRhsInt := rhs.(IntNode)
 		if isLhsInt && isRhsInt {
 			return IntNode{Value: intLhs.Value + intRhs.Value}, nil
 		}
 		if (isLhsString || isLhsInt) && (isRhsInt || isRhsString) {
 			return StrNode{Value: fmt.Sprintf("%s%s", lhs, rhs)}, nil
 		}
-		return nil, fmt.Errorf("'Add' operator can only concatenate Strs or sum Ints")
+		return nil, fmt.Errorf("'Add' operator can only be used with Ints and/or Strs")
 	case "Sub", "Mul", "Div", "Rem":
-		intLhs, isLhsInt := binary.Lhs.(IntNode)
-		intRhs, isRhsInt := binary.Rhs.(IntNode)
+		intLhs, isLhsInt := lhs.(IntNode)
+		intRhs, isRhsInt := rhs.(IntNode)
 		var result int32
 		if isLhsInt && isRhsInt {
 			switch binary.Op {
@@ -47,7 +48,7 @@ func (binary BinaryNode) Evaluate() (any, error) {
 		return nil, fmt.Errorf("'%s' operator can only be used with Ints", binary.Op)
 	case "Eq", "Neq":
 		hasSameValue := lhs == rhs
-		hasSameType := reflect.TypeOf(binary.Lhs) == reflect.TypeOf(binary.Rhs)
+		hasSameType := reflect.TypeOf(lhs) == reflect.TypeOf(rhs)
 		var result bool
 		switch binary.Op {
 		case "Eq":
@@ -57,8 +58,8 @@ func (binary BinaryNode) Evaluate() (any, error) {
 		}
 		return BoolNode{Value: result}, nil
 	case "Lt", "Gt", "Lte", "Gte":
-		intLhs, isLhsInt := binary.Lhs.(IntNode)
-		intRhs, isRhsInt := binary.Rhs.(IntNode)
+		intLhs, isLhsInt := lhs.(IntNode)
+		intRhs, isRhsInt := rhs.(IntNode)
 		var result bool
 		if isLhsInt && isRhsInt {
 			switch binary.Op {
@@ -75,8 +76,8 @@ func (binary BinaryNode) Evaluate() (any, error) {
 		}
 		return nil, fmt.Errorf("'%s' comparison can only be done with Ints", binary.Op)
 	case "And", "Or":
-		boolLhs, isLhsBool := binary.Lhs.(BoolNode)
-		boolRhs, isRhsBool := binary.Rhs.(BoolNode)
+		boolLhs, isLhsBool := lhs.(BoolNode)
+		boolRhs, isRhsBool := rhs.(BoolNode)
 		var result bool
 		if isLhsBool && isRhsBool {
 			switch binary.Op {

@@ -1,0 +1,93 @@
+{
+  "name": "files/variables.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "x",
+      "location": {
+        "start": 4,
+        "end": 5,
+        "filename": "files/variables.rinha"
+      }
+    },
+    "value": {
+      "kind": "Int",
+      "value": 5,
+      "location": {
+        "start": 8,
+        "end": 9,
+        "filename": "files/variables.rinha"
+      }
+    },
+    "next": {
+      "kind": "Let",
+      "name": {
+        "text": "x",
+        "location": {
+          "start": 15,
+          "end": 16,
+          "filename": "files/variables.rinha"
+        }
+      },
+      "value": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "Str",
+          "value": "Hello",
+          "location": {
+            "start": 19,
+            "end": 26,
+            "filename": "files/variables.rinha"
+          }
+        },
+        "op": "Add",
+        "rhs": {
+          "kind": "Str",
+          "value": " Hina!",
+          "location": {
+            "start": 29,
+            "end": 37,
+            "filename": "files/variables.rinha"
+          }
+        },
+        "location": {
+          "start": 19,
+          "end": 37,
+          "filename": "files/variables.rinha"
+        }
+      },
+      "next": {
+        "kind": "Print",
+        "value": {
+          "kind": "Var",
+          "text": "x",
+          "location": {
+            "start": 45,
+            "end": 46,
+            "filename": "files/variables.rinha"
+          }
+        },
+        "location": {
+          "start": 39,
+          "end": 47,
+          "filename": "files/variables.rinha"
+        }
+      },
+      "location": {
+        "start": 11,
+        "end": 47,
+        "filename": "files/variables.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 47,
+      "filename": "files/variables.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 47,
+    "filename": "files/variables.rinha"
+  }
+}

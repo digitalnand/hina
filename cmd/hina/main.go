@@ -17,6 +17,7 @@ func main() {
 		panic("file format not recognized")
 	}
 
+	// TODO: interpret multiple files
 	fileContent, err := os.ReadFile(arguments[0])
 	if err != nil {
 		panic(err)

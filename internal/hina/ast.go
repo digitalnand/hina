@@ -32,6 +32,16 @@ type BinaryNode struct {
 	Rhs any
 }
 
+type LetNode struct {
+	Identifier string
+	Value      any
+	Next       any
+}
+
+type VarNode struct {
+	Text string
+}
+
 type PrintNode struct {
 	Value any
 }
