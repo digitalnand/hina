@@ -5,7 +5,7 @@ hina is a [Rinha](https://github.com/aripiprazole/rinha-de-compiler) [tree-walki
 - [x] printing
 - [x] binary ops support
 - [x] variables support
-- [ ] tuples support
+- [x] tuples support
 - [ ] if support
 - [ ] functions support
 - [ ] better error handling 

@@ -58,9 +58,9 @@ func inspectTerm(node map[string]interface{}) (any, error) {
 		}
 		return letNode, nil
 	case "Var":
-		varNode, varErr := inspectVar(node)
-		if varErr != nil {
-			return nil, varErr
+		varNode, err := inspectVar(node)
+		if err != nil {
+			return nil, err
 		}
 
 		letNode, hasLet := symbolTable[varNode.Text].(LetNode)
@@ -68,9 +68,66 @@ func inspectTerm(node map[string]interface{}) (any, error) {
 			return nil, fmt.Errorf("calling an undeclared variable: %s", varNode.Text)
 		}
 		return letNode.Value, nil
+	case "Tuple":
+		tupleNode, err := inspectTuple(node)
+		if err != nil {
+			return nil, err
+		}
+		return tupleNode, nil
+	case "First", "Second":
+		tupleFunction, err := inspectTupleFunction(node)
+		if err != nil {
+			return nil, err
+		}
+		return tupleFunction, nil
 	default:
 		return nil, fmt.Errorf("unknown term: %s", kind)
 	}
+}
+
+func inspectTupleFunction(node map[string]interface{}) (any, error) {
+	kind, hasKind := node["kind"].(string)
+	valueNode, hasValue := node["value"].(map[string]interface{})
+	if !hasValue || !hasKind {
+		return nil, fmt.Errorf("'%s' node is badly structured", kind)
+	}
+
+	value, err := inspectTerm(valueNode)
+	if err != nil {
+		return nil, err
+	}
+	tuple, isTuple := value.(TupleNode)
+	if !isTuple {
+		return nil, fmt.Errorf("'%s' only accepts Tuples", kind)
+	}
+
+	var result any
+	switch kind {
+	case "First":
+		result = tuple.First
+	case "Second":
+		result = tuple.Second
+	}
+	return result, nil
+}
+
+func inspectTuple(node map[string]interface{}) (TupleNode, error) {
+	firstNode, hasFirst := node["first"].(map[string]interface{})
+	secondNode, hasSecond := node["second"].(map[string]interface{})
+	if !hasFirst || !hasSecond {
+		return TupleNode{}, fmt.Errorf("'Tuple' node is badly structured")
+	}
+
+	first, firstErr := inspectTerm(firstNode)
+	if firstErr != nil {
+		return TupleNode{}, nil
+	}
+	second, secondErr := inspectTerm(secondNode)
+	if secondErr != nil {
+		return TupleNode{}, nil
+	}
+
+	return TupleNode{First: first, Second: second}, nil
 }
 
 func inspectLet(node map[string]interface{}) (LetNode, error) {
@@ -82,9 +139,9 @@ func inspectLet(node map[string]interface{}) (LetNode, error) {
 		return LetNode{}, fmt.Errorf("'Let' node is badly structured")
 	}
 
-	value, valueErr := inspectTerm(valueNode)
-	if valueErr != nil {
-		return LetNode{}, valueErr
+	value, err := inspectTerm(valueNode)
+	if err != nil {
+		return LetNode{}, err
 	}
 
 	return LetNode{Identifier: identifier, Value: value, Next: nextNode}, nil
@@ -123,6 +180,7 @@ func inspectPrint(node map[string]interface{}) (PrintNode, error) {
 	if !hasValue {
 		return PrintNode{}, fmt.Errorf("'Print' node is badly structured")
 	}
+
 	termNode, err := inspectTerm(value)
 	if err != nil {
 		return PrintNode{}, err
@@ -143,6 +201,7 @@ func WalkTree(tree map[string]interface{}) error {
 	if expressionErr != nil {
 		return expressionErr
 	}
+
 	_, termErr := inspectTerm(expression)
 	if termErr != nil {
 		return termErr

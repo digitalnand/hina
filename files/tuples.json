@@ -1,0 +1,126 @@
+{
+  "name": "files/tuples.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "x",
+      "location": {
+        "start": 4,
+        "end": 5,
+        "filename": "files/tuples.rinha"
+      }
+    },
+    "value": {
+      "kind": "Tuple",
+      "first": {
+        "kind": "Int",
+        "value": 1,
+        "location": {
+          "start": 9,
+          "end": 10,
+          "filename": "files/tuples.rinha"
+        }
+      },
+      "second": {
+        "kind": "Tuple",
+        "first": {
+          "kind": "Int",
+          "value": 2,
+          "location": {
+            "start": 13,
+            "end": 14,
+            "filename": "files/tuples.rinha"
+          }
+        },
+        "second": {
+          "kind": "Int",
+          "value": 3,
+          "location": {
+            "start": 16,
+            "end": 17,
+            "filename": "files/tuples.rinha"
+          }
+        },
+        "location": {
+          "start": 12,
+          "end": 18,
+          "filename": "files/tuples.rinha"
+        }
+      },
+      "location": {
+        "start": 8,
+        "end": 19,
+        "filename": "files/tuples.rinha"
+      }
+    },
+    "next": {
+      "kind": "Print",
+      "value": {
+        "kind": "Binary",
+        "lhs": {
+          "kind": "First",
+          "value": {
+            "kind": "Var",
+            "text": "x",
+            "location": {
+              "start": 33,
+              "end": 34,
+              "filename": "files/tuples.rinha"
+            }
+          },
+          "location": {
+            "start": 27,
+            "end": 35,
+            "filename": "files/tuples.rinha"
+          }
+        },
+        "op": "Add",
+        "rhs": {
+          "kind": "Second",
+          "value": {
+            "kind": "Second",
+            "value": {
+              "kind": "Var",
+              "text": "x",
+              "location": {
+                "start": 52,
+                "end": 53,
+                "filename": "files/tuples.rinha"
+              }
+            },
+            "location": {
+              "start": 45,
+              "end": 54,
+              "filename": "files/tuples.rinha"
+            }
+          },
+          "location": {
+            "start": 38,
+            "end": 55,
+            "filename": "files/tuples.rinha"
+          }
+        },
+        "location": {
+          "start": 27,
+          "end": 55,
+          "filename": "files/tuples.rinha"
+        }
+      },
+      "location": {
+        "start": 21,
+        "end": 56,
+        "filename": "files/tuples.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 56,
+      "filename": "files/tuples.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 56,
+    "filename": "files/tuples.rinha"
+  }
+}

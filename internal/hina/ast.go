@@ -26,6 +26,15 @@ func (node BoolNode) String() string {
 	return fmt.Sprintf("%t", node.Value)
 }
 
+type TupleNode struct {
+	First  any
+	Second any
+}
+
+func (node TupleNode) String() string {
+	return fmt.Sprintf("(%s, %s)", node.First, node.Second)
+}
+
 type BinaryNode struct {
 	Lhs any
 	Op  string
