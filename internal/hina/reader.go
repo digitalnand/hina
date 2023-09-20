@@ -12,23 +12,14 @@ var (
 
 func inspectTerm(node map[string]interface{}) (any, error) {
 	kind := node["kind"]
-	value := fmt.Sprint(node["value"])
 
 	switch kind {
-	case "Str":
-		return StrNode{Value: value}, nil
-	case "Int":
-		num, err := strconv.Atoi(value)
+	case "Str", "Int", "Bool":
+		valueNode, err := inspectValueNode(node)
 		if err != nil {
 			return nil, err
 		}
-		return IntNode{Value: int32(num)}, nil
-	case "Bool":
-		boolValue, err := strconv.ParseBool(value)
-		if err != nil {
-			return nil, err
-		}
-		return BoolNode{Value: boolValue}, nil
+		return valueNode, nil
 	case "Print":
 		printNode, err := inspectPrint(node)
 		if err != nil {
@@ -58,16 +49,21 @@ func inspectTerm(node map[string]interface{}) (any, error) {
 		}
 		return letNode, nil
 	case "Var":
-		varNode, err := inspectVar(node)
-		if err != nil {
-			return nil, err
+		varNode, varErr := inspectVar(node)
+		if varErr != nil {
+			return nil, varErr
 		}
 
 		letNode, hasLet := symbolTable[varNode.Text].(LetNode)
 		if !hasLet {
 			return nil, fmt.Errorf("calling an undeclared variable: %s", varNode.Text)
 		}
-		return letNode.Value, nil
+
+		value, valueErr := inspectTerm(letNode.Value.(map[string]interface{}))
+		if valueErr != nil {
+			return nil, valueErr
+		}
+		return value, nil
 	case "Tuple":
 		tupleNode, err := inspectTuple(node)
 		if err != nil {
@@ -173,12 +169,7 @@ func inspectLet(node map[string]interface{}) (LetNode, error) {
 		return LetNode{}, fmt.Errorf("'Let' node is badly structured")
 	}
 
-	value, err := inspectTerm(valueNode)
-	if err != nil {
-		return LetNode{}, err
-	}
-
-	return LetNode{Identifier: identifier, Value: value, Next: nextNode}, nil
+	return LetNode{Identifier: identifier, Value: valueNode, Next: nextNode}, nil
 }
 
 func inspectVar(node map[string]interface{}) (VarNode, error) {
@@ -220,6 +211,34 @@ func inspectPrint(node map[string]interface{}) (PrintNode, error) {
 		return PrintNode{}, err
 	}
 	return PrintNode{Value: termNode}, nil
+}
+
+func inspectValueNode(node map[string]interface{}) (any, error) {
+	kind, hasKind := node["kind"].(string)
+	value, hasValue := node["value"]
+	if !hasKind || !hasValue {
+		return nil, fmt.Errorf("'%s' node is badly structured", kind)
+	}
+
+	valueStr := fmt.Sprint(value)
+	var result any
+	switch kind {
+	case "Str":
+		result = StrNode{Value: valueStr}
+	case "Int":
+		num, err := strconv.Atoi(valueStr)
+		if err != nil {
+			return nil, err
+		}
+		result = IntNode{Value: int32(num)}
+	case "Bool":
+		boolValue, err := strconv.ParseBool(valueStr)
+		if err != nil {
+			return nil, err
+		}
+		result = BoolNode{Value: boolValue}
+	}
+	return result, nil
 }
 
 func getExpression(tree map[string]interface{}) (map[string]interface{}, error) {
