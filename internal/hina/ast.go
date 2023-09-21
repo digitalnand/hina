@@ -35,6 +35,11 @@ func (node TupleNode) String() string {
 	return fmt.Sprintf("(%s, %s)", node.First, node.Second)
 }
 
+type TupleFunction struct {
+	Kind  string
+	Value any
+}
+
 type BinaryNode struct {
 	Lhs any
 	Op  string
@@ -56,7 +61,7 @@ type PrintNode struct {
 }
 
 type IfNode struct {
-	Condition BoolNode
+	Condition any
 	Then      any
 	Else      any
 }

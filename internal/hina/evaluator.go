@@ -5,14 +5,135 @@ import (
 	"reflect"
 )
 
-func (print PrintNode) Evaluate() any {
-	fmt.Println(print.Value)
-	return print.Value
+func EvalTree(tree map[string]interface{}, env Environment) error {
+	expression, expressionErr := getExpression(tree)
+	if expressionErr != nil {
+		return expressionErr
+	}
+
+	_, termErr := evalNode(expression, env)
+	if termErr != nil {
+		return termErr
+	}
+	return nil
 }
 
-func (binary BinaryNode) Evaluate() (any, error) {
-	lhs := binary.Lhs
-	rhs := binary.Rhs
+func getExpression(tree map[string]interface{}) (map[string]interface{}, error) {
+	expression, hasExpression := tree["expression"].(map[string]interface{})
+	if !hasExpression || len(expression) < 1 {
+		return nil, fmt.Errorf("tree has no expressions")
+	}
+	return expression, nil
+}
+
+func evalNode(node map[string]interface{}, env Environment) (any, error) {
+	kind := node["kind"]
+
+	switch kind {
+	case "Str", "Int", "Bool":
+		literalNode, err := inspectLiteral(node)
+		if err != nil {
+			return nil, err
+		}
+		return literalNode, nil
+	case "Print":
+		printNode, printErr := inspectPrint(node)
+		if printErr != nil {
+			return nil, printErr
+		}
+		resultNode, resultErr := printNode.Evaluate(env)
+		if resultErr != nil {
+			return nil, resultErr
+		}
+		return resultNode, nil
+	case "Binary":
+		binaryNode, inspectErr := inspectBinary(node)
+		if inspectErr != nil {
+			return nil, inspectErr
+		}
+		resultNode, resultErr := binaryNode.Evaluate(env)
+		if resultErr != nil {
+			return nil, resultErr
+		}
+		return resultNode, nil
+	case "Let":
+		letNode, letErr := inspectLet(node)
+		if letErr != nil {
+			return nil, letErr
+		}
+		resultErr := letNode.Evaluate(env)
+		if resultErr != nil {
+			return nil, resultErr
+		}
+		return letNode, nil
+	case "Var":
+		varNode, varErr := inspectVar(node)
+		if varErr != nil {
+			return nil, varErr
+		}
+		value, valueErr := varNode.Evaluate(env)
+		if valueErr != nil {
+			return nil, valueErr
+		}
+		return value, nil
+	case "Tuple":
+		tupleNode, err := inspectTuple(node)
+		if err != nil {
+			return nil, err
+		}
+		tupleNode, err = tupleNode.Evaluate(env)
+		if err != nil {
+			return nil, err
+		}
+		return tupleNode, nil
+	case "First", "Second":
+		node, nodeErr := inspectTupleFunction(node)
+		if nodeErr != nil {
+			return nil, nodeErr
+		}
+		value, valueErr := node.Evaluate(env)
+		if valueErr != nil {
+			return nil, valueErr
+		}
+		return value, nil
+	case "If":
+		ifNode, ifErr := inspectIf(node)
+		if ifErr != nil {
+			return nil, ifErr
+		}
+		resultNode, nodeErr := ifNode.Evaluate(env)
+		if nodeErr != nil {
+			return nil, nodeErr
+		}
+		result, resultErr := evalNode(resultNode.(map[string]interface{}), env)
+		if resultErr != nil {
+			return nil, resultErr
+		}
+		return result, nil
+	default:
+		return nil, fmt.Errorf("unknown term: %s", kind)
+	}
+}
+
+func (print PrintNode) Evaluate(env Environment) (any, error) {
+	value, valueErr := evalNode(print.Value.(map[string]interface{}), env)
+	if valueErr != nil {
+		return nil, valueErr
+	}
+
+	fmt.Println(value)
+	return value, nil
+}
+
+func (binary BinaryNode) Evaluate(env Environment) (any, error) {
+	lhs, lhsErr := evalNode(binary.Lhs.(map[string]interface{}), env)
+	if lhsErr != nil {
+		return nil, lhsErr
+	}
+	rhs, rhsErr := evalNode(binary.Rhs.(map[string]interface{}), env)
+	if rhsErr != nil {
+		return nil, rhsErr
+	}
 
 	switch binary.Op {
 	case "Add":
@@ -94,10 +215,76 @@ func (binary BinaryNode) Evaluate() (any, error) {
 	}
 }
 
-func (node IfNode) Evaluate() any {
-	condition := node.Condition
-	if condition.Value {
-		return node.Then
+func (variable LetNode) Evaluate(env Environment) error {
+	env.Set(variable.Identifier, variable)
+	_, nextErr := evalNode(variable.Next.(map[string]interface{}), env)
+	if nextErr != nil {
+		return nextErr
 	}
-	return node.Else
+	return nil
+}
+
+func (varCall VarNode) Evaluate(env Environment) (any, error) {
+	node, hasNode := env.Get(varCall.Text)
+	if !hasNode {
+		return nil, fmt.Errorf("calling an undeclared variable: %s", varCall.Text)
+	}
+	variable, isLet := node.(LetNode)
+	if !isLet {
+		return nil, fmt.Errorf("'Var' can only call Let")
+	}
+
+	value, valueErr := evalNode(variable.Value.(map[string]interface{}), env)
+	if valueErr != nil {
+		return nil, valueErr
+	}
+	return value, nil
+}
+
+func (tuple TupleNode) Evaluate(env Environment) (TupleNode, error) {
+	first, firstErr := evalNode(tuple.First.(map[string]interface{}), env)
+	if firstErr != nil {
+		return TupleNode{}, nil
+	}
+	second, secondErr := evalNode(tuple.Second.(map[string]interface{}), env)
+	if secondErr != nil {
+		return TupleNode{}, nil
+	}
+	return TupleNode{First: first, Second: second}, nil
+}
+
+func (tupleFunc TupleFunction) Evaluate(env Environment) (any, error) {
+	value, valueErr := evalNode(tupleFunc.Value.(map[string]interface{}), env)
+	if valueErr != nil {
+		return nil, valueErr
+	}
+	tuple, isTuple := value.(TupleNode)
+	if !isTuple {
+		return nil, fmt.Errorf("'%s' only accepts Tuples", tupleFunc.Kind)
+	}
+
+	switch tupleFunc.Kind {
+	case "First":
+		return tuple.First, nil
+	case "Second":
+		return tuple.Second, nil
+	default:
+		return nil, fmt.Errorf("'%s' isn't a Tuple function", tupleFunc.Kind)
+	}
+}
+
+func (ifTerm IfNode) Evaluate(env Environment) (any, error) {
+	conditionNode, nodeErr := evalNode(ifTerm.Condition.(map[string]interface{}), env)
+	if nodeErr != nil {
+		return nil, nodeErr
+	}
+	condition, isBool := conditionNode.(BoolNode)
+	if !isBool {
+		return nil, fmt.Errorf("'If' only accepts Bools as condition")
+	}
+
+	if condition.Value {
+		return ifTerm.Then, nil
+	}
+	return ifTerm.Else, nil
 }

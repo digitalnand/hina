@@ -29,7 +29,8 @@ func main() {
 		panic(err)
 	}
 
-	err = hina.WalkTree(jsonContent)
+	env := hina.NewEnvironment()
+	err = hina.EvalTree(jsonContent, env)
 	if err != nil {
 		panic(err)
 	}
