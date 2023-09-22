@@ -65,3 +65,18 @@ type IfNode struct {
 	Then      any
 	Else      any
 }
+
+type FunctionNode struct {
+	Parameters []interface{}
+	Value      any
+	Env        Environment
+}
+
+func (node FunctionNode) String() string {
+	return "<#closure>"
+}
+
+type CallNode struct {
+	Arguments []interface{}
+	Callee    any
+}

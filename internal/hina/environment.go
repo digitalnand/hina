@@ -13,9 +13,9 @@ func NewEnvironment() Environment {
 func (env Environment) Get(identifier string) (any, bool) {
 	node, hasNode := env.SymbolTable[identifier]
 	if !hasNode {
-		return nil, hasNode
+		return nil, false
 	}
-	return node, hasNode
+	return node, true
 }
 
 func (env Environment) Set(identifier string, value any) {

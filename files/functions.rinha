@@ -1,0 +1,7 @@
+let x = "Hey!";
+let z = "Hello World!";
+let concat = fn (x, y) => {
+    x + " " + y + " " + z
+};
+
+print(concat("Hello", "Hina!"))
