@@ -52,11 +52,11 @@ func evalNode(node Object, env Environment) (Term, error) {
 		if inspectErr != nil {
 			return nil, inspectErr
 		}
-		evalErr := let.Eval(env)
+		result, evalErr := let.Eval(env)
 		if evalErr != nil {
 			return nil, evalErr
 		}
-		return let, nil
+		return result, nil
 	case "Var":
 		varNode, inspectErr := inspectVar(node)
 		if inspectErr != nil {
@@ -208,23 +208,23 @@ func (binary BinaryNode) Eval(env Environment) (Term, error) {
 	return nil, fmt.Errorf("unknown binary operator: '%s'", binary.Op)
 }
 
-func (variable LetNode) Eval(env Environment) error {
-	env.Set(variable.Identifier, variable.Value)
-	_, err := evalNode(variable.Next.(map[string]interface{}), env)
-	if err != nil {
-		return err
+func (variable LetNode) Eval(env Environment) (Term, error) {
+	value, valueEvalError := evalNode(variable.Value.(map[string]interface{}), env)
+	if valueEvalError != nil {
+		return nil, valueEvalError
 	}
-	return nil
+	env.Set(variable.Identifier, value)
+	nextResult, nextEvalErr := evalNode(variable.Next.(map[string]interface{}), env)
+	if nextEvalErr != nil {
+		return nil, nextEvalErr
+	}
+	return nextResult, nil
 }
 
 func (varCall VarNode) Eval(env Environment) (Term, error) {
-	variable, exists := env.Get(varCall.Text)
+	value, exists := env.Get(varCall.Text)
 	if !exists {
 		return nil, fmt.Errorf("calling an undeclared variable: %s", varCall.Text)
-	}
-	value, err := evalNode(variable.(map[string]interface{}), env)
-	if err != nil {
-		return nil, err
 	}
 	return value, nil
 }
@@ -289,7 +289,7 @@ func (function FunctionNode) captureEnv(env Environment) {
 	}
 }
 
-func (function FunctionNode) setParameters(arguments []interface{}) error {
+func (function FunctionNode) setParameters(arguments []interface{}, env Environment) error {
 	if len(function.Parameters) != len(arguments) {
 		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(arguments))
 	}
@@ -300,10 +300,16 @@ func (function FunctionNode) setParameters(arguments []interface{}) error {
 		if !hasParameter || !parameterHasName {
 			return fmt.Errorf("malformed parameter in index %d", argIndex)
 		}
-		argument, hasArgument := arguments[argIndex].(map[string]interface{})
+
+		argumentNode, hasArgument := arguments[argIndex].(map[string]interface{})
 		if !hasArgument {
 			return fmt.Errorf("malformed argument in index %d", argIndex)
 		}
+		argument, evalErr := evalNode(argumentNode, env)
+		if evalErr != nil {
+			return evalErr
+		}
+
 		if _, exists := function.Env.Get(parameterName); exists {
 			return fmt.Errorf("mixed parameter: %s", parameterName)
 		}
@@ -323,7 +329,8 @@ func (call CallNode) Eval(env Environment) (Term, error) {
 		return nil, fmt.Errorf("'Call' can only call Functions")
 	}
 
-	parametersErr := function.setParameters(call.Arguments)
+	function.Env = NewEnvironment()
+	parametersErr := function.setParameters(call.Arguments, env)
 	if parametersErr != nil {
 		return nil, parametersErr
 	}
