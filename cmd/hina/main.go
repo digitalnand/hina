@@ -10,7 +10,7 @@ import (
 
 func main() {
 	arguments := os.Args[1:]
-	if len(arguments) < 1 {
+	if len(arguments) == 0 {
 		panic("no input files")
 	}
 	if filepath.Ext(arguments[0]) != ".json" {
@@ -23,7 +23,7 @@ func main() {
 		panic(err)
 	}
 
-	var jsonContent map[string]interface{}
+	var jsonContent hina.Object
 	err = json.Unmarshal(fileContent, &jsonContent)
 	if err != nil {
 		panic(err)

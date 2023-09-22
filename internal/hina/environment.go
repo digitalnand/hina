@@ -10,7 +10,7 @@ func NewEnvironment() Environment {
 	return env
 }
 
-func (env Environment) Get(identifier string) (any, bool) {
+func (env Environment) Get(identifier string) (Term, bool) {
 	node, hasNode := env.SymbolTable[identifier]
 	if !hasNode {
 		return nil, false
@@ -18,6 +18,6 @@ func (env Environment) Get(identifier string) (any, bool) {
 	return node, true
 }
 
-func (env Environment) Set(identifier string, value any) {
+func (env Environment) Set(identifier string, value Term) {
 	env.SymbolTable[identifier] = value
 }

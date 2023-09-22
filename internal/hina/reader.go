@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-func inspectCall(node map[string]interface{}) (CallNode, error) {
+func inspectCall(node Object) (CallNode, error) {
 	arguments, hasArguments := node["arguments"].([]interface{})
 	callee, hasCallee := node["callee"].(map[string]interface{})
 	if !hasArguments || !hasCallee {
@@ -14,7 +14,7 @@ func inspectCall(node map[string]interface{}) (CallNode, error) {
 	return CallNode{Arguments: arguments, Callee: callee}, nil
 }
 
-func inspectFunction(node map[string]interface{}) (FunctionNode, error) {
+func inspectFunction(node Object) (FunctionNode, error) {
 	parameters, hasParameters := node["parameters"].([]interface{})
 	value, hasValue := node["value"].(map[string]interface{})
 	if !hasParameters || !hasValue {
@@ -23,7 +23,7 @@ func inspectFunction(node map[string]interface{}) (FunctionNode, error) {
 	return FunctionNode{Parameters: parameters, Value: value, Env: NewEnvironment()}, nil
 }
 
-func inspectIf(node map[string]interface{}) (IfNode, error) {
+func inspectIf(node Object) (IfNode, error) {
 	condition, hasCondition := node["condition"].(map[string]interface{})
 	then, hasThen := node["then"].(map[string]interface{})
 	elseNode, hasElse := node["otherwise"].(map[string]interface{})
@@ -33,7 +33,7 @@ func inspectIf(node map[string]interface{}) (IfNode, error) {
 	return IfNode{Condition: condition, Then: then, Else: elseNode}, nil
 }
 
-func inspectTupleFunction(node map[string]interface{}) (TupleFunction, error) {
+func inspectTupleFunction(node Object) (TupleFunction, error) {
 	kind, hasKind := node["kind"].(string)
 	value, hasValue := node["value"].(map[string]interface{})
 	if !hasValue || !hasKind {
@@ -42,7 +42,7 @@ func inspectTupleFunction(node map[string]interface{}) (TupleFunction, error) {
 	return TupleFunction{Kind: kind, Value: value}, nil
 }
 
-func inspectTuple(node map[string]interface{}) (TupleNode, error) {
+func inspectTuple(node Object) (TupleNode, error) {
 	first, hasFirst := node["first"].(map[string]interface{})
 	second, hasSecond := node["second"].(map[string]interface{})
 	if !hasFirst || !hasSecond {
@@ -51,7 +51,7 @@ func inspectTuple(node map[string]interface{}) (TupleNode, error) {
 	return TupleNode{First: first, Second: second}, nil
 }
 
-func inspectVar(node map[string]interface{}) (VarNode, error) {
+func inspectVar(node Object) (VarNode, error) {
 	text, hasText := node["text"].(string)
 	if !hasText {
 		return VarNode{}, fmt.Errorf("'Var' node is badly structured")
@@ -59,7 +59,7 @@ func inspectVar(node map[string]interface{}) (VarNode, error) {
 	return VarNode{Text: text}, nil
 }
 
-func inspectLet(node map[string]interface{}) (LetNode, error) {
+func inspectLet(node Object) (LetNode, error) {
 	name, hasName := node["name"].(map[string]interface{})
 	identifier, hasIdentifier := name["text"].(string)
 	value, hasValue := node["value"].(map[string]interface{})
@@ -71,7 +71,7 @@ func inspectLet(node map[string]interface{}) (LetNode, error) {
 	return LetNode{Identifier: identifier, Value: value, Next: next}, nil
 }
 
-func inspectBinary(node map[string]interface{}) (BinaryNode, error) {
+func inspectBinary(node Object) (BinaryNode, error) {
 	op, hasOp := node["op"].(string)
 	lhs, hasLhs := node["lhs"].(map[string]interface{})
 	rhs, hasRhs := node["rhs"].(map[string]interface{})
@@ -81,7 +81,7 @@ func inspectBinary(node map[string]interface{}) (BinaryNode, error) {
 	return BinaryNode{Lhs: lhs, Op: op, Rhs: rhs}, nil
 }
 
-func inspectPrint(node map[string]interface{}) (PrintNode, error) {
+func inspectPrint(node Object) (PrintNode, error) {
 	value, hasValue := node["value"].(map[string]interface{})
 	if !hasValue {
 		return PrintNode{}, fmt.Errorf("'Print' node is badly structured")
@@ -89,7 +89,7 @@ func inspectPrint(node map[string]interface{}) (PrintNode, error) {
 	return PrintNode{Value: value}, nil
 }
 
-func inspectLiteral(node map[string]interface{}) (any, error) {
+func inspectLiteral(node Object) (Term, error) {
 	kind, hasKind := node["kind"].(string)
 	value, hasValue := node["value"]
 	if !hasKind || !hasValue {
@@ -97,7 +97,7 @@ func inspectLiteral(node map[string]interface{}) (any, error) {
 	}
 
 	valueStr := fmt.Sprint(value)
-	var result any
+	var result Term
 	switch kind {
 	case "Str":
 		result = StrNode{Value: valueStr}

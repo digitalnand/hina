@@ -5,7 +5,7 @@ import (
 	"reflect"
 )
 
-func EvalTree(tree map[string]interface{}, env Environment) error {
+func EvalTree(tree Object, env Environment) error {
 	expression, exists := tree["expression"].(map[string]interface{})
 	if !exists || len(expression) == 0 {
 		return fmt.Errorf("tree has no expressions")
@@ -17,7 +17,7 @@ func EvalTree(tree map[string]interface{}, env Environment) error {
 	return nil
 }
 
-func evalNode(node map[string]interface{}, env Environment) (any, error) {
+func evalNode(node Object, env Environment) (Term, error) {
 	kind := node["kind"]
 
 	switch kind {
@@ -118,7 +118,7 @@ func evalNode(node map[string]interface{}, env Environment) (any, error) {
 	return nil, fmt.Errorf("unknown term: %s", kind)
 }
 
-func (print PrintNode) Eval(env Environment) (any, error) {
+func (print PrintNode) Eval(env Environment) (Term, error) {
 	value, err := evalNode(print.Value.(map[string]interface{}), env)
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (print PrintNode) Eval(env Environment) (any, error) {
 	return value, nil
 }
 
-func (binary BinaryNode) Eval(env Environment) (any, error) {
+func (binary BinaryNode) Eval(env Environment) (Term, error) {
 	lhs, lhsEvalErr := evalNode(binary.Lhs.(map[string]interface{}), env)
 	if lhsEvalErr != nil {
 		return nil, lhsEvalErr
@@ -217,7 +217,7 @@ func (variable LetNode) Eval(env Environment) error {
 	return nil
 }
 
-func (varCall VarNode) Eval(env Environment) (any, error) {
+func (varCall VarNode) Eval(env Environment) (Term, error) {
 	variable, exists := env.Get(varCall.Text)
 	if !exists {
 		return nil, fmt.Errorf("calling an undeclared variable: %s", varCall.Text)
@@ -241,7 +241,7 @@ func (tuple TupleNode) Eval(env Environment) (TupleNode, error) {
 	return TupleNode{First: first, Second: second}, nil
 }
 
-func (tupleFunc TupleFunction) Eval(env Environment) (any, error) {
+func (tupleFunc TupleFunction) Eval(env Environment) (Term, error) {
 	value, err := evalNode(tupleFunc.Value.(map[string]interface{}), env)
 	if err != nil {
 		return nil, err
@@ -256,7 +256,7 @@ func (tupleFunc TupleFunction) Eval(env Environment) (any, error) {
 	return tuple.First, nil
 }
 
-func (ifTerm IfNode) Eval(env Environment) (any, error) {
+func (ifTerm IfNode) Eval(env Environment) (Term, error) {
 	conditionNode, conditionEvalErr := evalNode(ifTerm.Condition.(map[string]interface{}), env)
 	if conditionEvalErr != nil {
 		return nil, conditionEvalErr
@@ -266,7 +266,7 @@ func (ifTerm IfNode) Eval(env Environment) (any, error) {
 		return nil, fmt.Errorf("'If' only accepts Bools as condition")
 	}
 
-	var body any
+	var body Term
 	if condition.Value {
 		body = ifTerm.Then
 	} else {
@@ -312,7 +312,7 @@ func (function FunctionNode) setParameters(arguments []interface{}) error {
 	return nil
 }
 
-func (call CallNode) Eval(env Environment) (any, error) {
+func (call CallNode) Eval(env Environment) (Term, error) {
 	calleeNode := call.Callee.(map[string]interface{})
 	callee, calleeEvalErr := evalNode(calleeNode, env)
 	if calleeEvalErr != nil {

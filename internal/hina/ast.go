@@ -2,6 +2,9 @@ package hina
 
 import "fmt"
 
+type Term interface{}
+type Object map[string]interface{}
+
 type StrNode struct {
 	Value string
 }
@@ -27,8 +30,8 @@ func (node BoolNode) String() string {
 }
 
 type TupleNode struct {
-	First  any
-	Second any
+	First  Term
+	Second Term
 }
 
 func (node TupleNode) String() string {
@@ -37,19 +40,19 @@ func (node TupleNode) String() string {
 
 type TupleFunction struct {
 	Kind  string
-	Value any
+	Value Term
 }
 
 type BinaryNode struct {
-	Lhs any
+	Lhs Term
 	Op  string
-	Rhs any
+	Rhs Term
 }
 
 type LetNode struct {
 	Identifier string
-	Value      any
-	Next       any
+	Value      Term
+	Next       Term
 }
 
 type VarNode struct {
@@ -57,18 +60,18 @@ type VarNode struct {
 }
 
 type PrintNode struct {
-	Value any
+	Value Term
 }
 
 type IfNode struct {
-	Condition any
-	Then      any
-	Else      any
+	Condition Term
+	Then      Term
+	Else      Term
 }
 
 type FunctionNode struct {
 	Parameters []interface{}
-	Value      any
+	Value      Term
 	Env        Environment
 }
 
@@ -78,5 +81,5 @@ func (node FunctionNode) String() string {
 
 type CallNode struct {
 	Arguments []interface{}
-	Callee    any
+	Callee    Term
 }
