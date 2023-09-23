@@ -5,81 +5,81 @@ import "fmt"
 type Term interface{}
 type Object map[string]interface{}
 
-type StrNode struct {
+type StrTerm struct {
 	Value string
 }
 
-func (node StrNode) String() string {
+func (node StrTerm) String() string {
 	return node.Value
 }
 
-type IntNode struct {
+type IntTerm struct {
 	Value int32
 }
 
-func (node IntNode) String() string {
+func (node IntTerm) String() string {
 	return fmt.Sprintf("%d", node.Value)
 }
 
-type BoolNode struct {
+type BoolTerm struct {
 	Value bool
 }
 
-func (node BoolNode) String() string {
+func (node BoolTerm) String() string {
 	return fmt.Sprintf("%t", node.Value)
 }
 
-type TupleNode struct {
+type TupleTerm struct {
 	First  Term
 	Second Term
 }
 
-func (node TupleNode) String() string {
+func (node TupleTerm) String() string {
 	return fmt.Sprintf("(%s, %s)", node.First, node.Second)
 }
 
 type TupleFunction struct {
 	Kind  string
-	Value Term
+	Value Object
 }
 
-type BinaryNode struct {
-	Lhs Term
+type BinaryTerm struct {
+	Lhs Object
 	Op  string
-	Rhs Term
+	Rhs Object
 }
 
-type LetNode struct {
+type LetTerm struct {
 	Identifier string
-	Value      Term
-	Next       Term
+	Value      Object
+	Next       Object
 }
 
-type VarNode struct {
+type VarTerm struct {
 	Text string
 }
 
-type PrintNode struct {
-	Value Term
+type PrintTerm struct {
+	Value Object
 }
 
-type IfNode struct {
-	Condition Term
-	Then      Term
-	Else      Term
+type IfTerm struct {
+	Condition Object
+	Then      Object
+	Else      Object
 }
 
-type FunctionNode struct {
+type FunctionTerm struct {
 	Parameters []interface{}
-	Value      Term
+	Value      Object
 	Env        Environment
 }
 
-func (node FunctionNode) String() string {
+func (node FunctionTerm) String() string {
 	return "<#closure>"
 }
 
-type CallNode struct {
+type CallTerm struct {
 	Arguments []interface{}
-	Callee    Term
+	Callee    Object
 }

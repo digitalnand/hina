@@ -13,12 +13,15 @@ func main() {
 	if len(arguments) == 0 {
 		panic("no input files")
 	}
-	if filepath.Ext(arguments[0]) != ".json" {
-		panic("file format not recognized")
+	if len(arguments) > 1 {
+		panic("hina can only interpret one file at a time")
 	}
 
-	// TODO: interpret multiple files
-	fileContent, err := os.ReadFile(arguments[0])
+	filePath := arguments[0]
+	if filepath.Ext(filePath) != ".json" {
+		panic("file format not recognized")
+	}
+	fileContent, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
 	}

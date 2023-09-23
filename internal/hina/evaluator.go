@@ -32,11 +32,11 @@ func evalNode(node Object, env Environment) (Term, error) {
 		if inspectErr != nil {
 			return nil, inspectErr
 		}
-		returnNode, evalErr := print.Eval(env)
+		returnTerm, evalErr := print.Eval(env)
 		if evalErr != nil {
 			return nil, evalErr
 		}
-		return returnNode, nil
+		return returnTerm, nil
 	case "Binary":
 		binary, inspectErr := inspectBinary(node)
 		if inspectErr != nil {
@@ -52,31 +52,31 @@ func evalNode(node Object, env Environment) (Term, error) {
 		if inspectErr != nil {
 			return nil, inspectErr
 		}
-		result, evalErr := let.Eval(env)
+		nextResult, evalErr := let.Eval(env)
 		if evalErr != nil {
 			return nil, evalErr
 		}
-		return result, nil
+		return nextResult, nil
 	case "Var":
-		varNode, inspectErr := inspectVar(node)
+		varTerm, inspectErr := inspectVar(node)
 		if inspectErr != nil {
 			return nil, inspectErr
 		}
-		value, evalErr := varNode.Eval(env)
+		value, evalErr := varTerm.Eval(env)
 		if evalErr != nil {
 			return nil, evalErr
 		}
 		return value, nil
 	case "Tuple":
-		tupleNode, err := inspectTuple(node)
+		tuple, err := inspectTuple(node)
 		if err != nil {
 			return nil, err
 		}
-		tupleNode, err = tupleNode.Eval(env)
+		tuple, err = tuple.Eval(env)
 		if err != nil {
 			return nil, err
 		}
-		return tupleNode, nil
+		return tuple, nil
 	case "First", "Second":
 		tupleFunc, inspectErr := inspectTupleFunction(node)
 		if inspectErr != nil {
@@ -88,11 +88,11 @@ func evalNode(node Object, env Environment) (Term, error) {
 		}
 		return value, nil
 	case "If":
-		ifNode, inspectErr := inspectIf(node)
+		ifTerm, inspectErr := inspectIf(node)
 		if inspectErr != nil {
 			return nil, inspectErr
 		}
-		result, evalErr := ifNode.Eval(env)
+		result, evalErr := ifTerm.Eval(env)
 		if evalErr != nil {
 			return nil, evalErr
 		}
@@ -104,9 +104,9 @@ func evalNode(node Object, env Environment) (Term, error) {
 		}
 		return function, nil
 	case "Call":
-		call, inspectNode := inspectCall(node)
-		if inspectNode != nil {
-			return nil, inspectNode
+		call, inspectTerm := inspectCall(node)
+		if inspectTerm != nil {
+			return nil, inspectTerm
 		}
 		result, evalErr := call.Eval(env)
 		if evalErr != nil {
@@ -118,8 +118,8 @@ func evalNode(node Object, env Environment) (Term, error) {
 	return nil, fmt.Errorf("unknown term: %s", kind)
 }
 
-func (print PrintNode) Eval(env Environment) (Term, error) {
-	value, err := evalNode(print.Value.(map[string]interface{}), env)
+func (print PrintTerm) Eval(env Environment) (Term, error) {
+	value, err := evalNode(print.Value, env)
 	if err != nil {
 		return nil, err
 	}
@@ -127,12 +127,12 @@ func (print PrintNode) Eval(env Environment) (Term, error) {
 	return value, nil
 }
 
-func (binary BinaryNode) Eval(env Environment) (Term, error) {
-	lhs, lhsEvalErr := evalNode(binary.Lhs.(map[string]interface{}), env)
+func (binary BinaryTerm) Eval(env Environment) (Term, error) {
+	lhs, lhsEvalErr := evalNode(binary.Lhs, env)
 	if lhsEvalErr != nil {
 		return nil, lhsEvalErr
 	}
-	rhs, rhsEvalErr := evalNode(binary.Rhs.(map[string]interface{}), env)
+	rhs, rhsEvalErr := evalNode(binary.Rhs, env)
 	if rhsEvalErr != nil {
 		return nil, rhsEvalErr
 	}
@@ -140,88 +140,88 @@ func (binary BinaryNode) Eval(env Environment) (Term, error) {
 	switch binary.Op {
 	case "Add":
 		// TODO: improve this
-		_, isLhsString := lhs.(StrNode)
-		_, isRhsString := rhs.(StrNode)
-		intLhs, isLhsInt := lhs.(IntNode)
-		intRhs, isRhsInt := rhs.(IntNode)
+		_, isLhsString := lhs.(StrTerm)
+		_, isRhsString := rhs.(StrTerm)
+		intLhs, isLhsInt := lhs.(IntTerm)
+		intRhs, isRhsInt := rhs.(IntTerm)
 		if isLhsString || isRhsString {
-			return StrNode{Value: fmt.Sprintf("%s%s", lhs, rhs)}, nil
+			return StrTerm{Value: fmt.Sprintf("%s%s", lhs, rhs)}, nil
 		} else if isLhsInt && isRhsInt {
-			return IntNode{Value: intLhs.Value + intRhs.Value}, nil
+			return IntTerm{Value: intLhs.Value + intRhs.Value}, nil
 		}
 		return nil, fmt.Errorf("'Add' operator can only be used with Ints and/or Strs")
 	case "Sub", "Mul", "Div", "Rem":
-		intLhs, isLhsInt := lhs.(IntNode)
-		intRhs, isRhsInt := rhs.(IntNode)
+		intLhs, isLhsInt := lhs.(IntTerm)
+		intRhs, isRhsInt := rhs.(IntTerm)
 		if !isLhsInt && !isRhsInt {
 			return nil, fmt.Errorf("'%s' operator can only be used with Ints", binary.Op)
 		}
 		switch binary.Op {
 		case "Sub":
-			return IntNode{Value: intLhs.Value - intRhs.Value}, nil
+			return IntTerm{Value: intLhs.Value - intRhs.Value}, nil
 		case "Mul":
-			return IntNode{Value: intLhs.Value * intRhs.Value}, nil
+			return IntTerm{Value: intLhs.Value * intRhs.Value}, nil
 		case "Div":
-			return IntNode{Value: intLhs.Value / intRhs.Value}, nil
+			return IntTerm{Value: intLhs.Value / intRhs.Value}, nil
 		case "Rem":
-			return IntNode{Value: intLhs.Value % intRhs.Value}, nil
+			return IntTerm{Value: intLhs.Value % intRhs.Value}, nil
 		}
 	case "Eq", "Neq":
 		hasSameValue := lhs == rhs
 		hasSameType := reflect.TypeOf(lhs) == reflect.TypeOf(rhs)
 		switch binary.Op {
 		case "Eq":
-			return BoolNode{Value: hasSameValue && hasSameType}, nil
+			return BoolTerm{Value: hasSameValue && hasSameType}, nil
 		case "Neq":
-			return BoolNode{Value: !hasSameValue || !hasSameType}, nil
+			return BoolTerm{Value: !hasSameValue || !hasSameType}, nil
 		}
 	case "Lt", "Gt", "Lte", "Gte":
-		intLhs, isLhsInt := lhs.(IntNode)
-		intRhs, isRhsInt := rhs.(IntNode)
+		intLhs, isLhsInt := lhs.(IntTerm)
+		intRhs, isRhsInt := rhs.(IntTerm)
 		if !isLhsInt && !isRhsInt {
 			return nil, fmt.Errorf("'%s' comparison can only be done with Ints", binary.Op)
 		}
 		switch binary.Op {
 		case "Lt":
-			return BoolNode{Value: intLhs.Value < intRhs.Value}, nil
+			return BoolTerm{Value: intLhs.Value < intRhs.Value}, nil
 		case "Gt":
-			return BoolNode{Value: intLhs.Value > intRhs.Value}, nil
+			return BoolTerm{Value: intLhs.Value > intRhs.Value}, nil
 		case "Lte":
-			return BoolNode{Value: intLhs.Value <= intRhs.Value}, nil
+			return BoolTerm{Value: intLhs.Value <= intRhs.Value}, nil
 		case "Gte":
-			return BoolNode{Value: intLhs.Value >= intRhs.Value}, nil
+			return BoolTerm{Value: intLhs.Value >= intRhs.Value}, nil
 		}
 	case "And", "Or":
-		boolLhs, isLhsBool := lhs.(BoolNode)
-		boolRhs, isRhsBool := rhs.(BoolNode)
+		boolLhs, isLhsBool := lhs.(BoolTerm)
+		boolRhs, isRhsBool := rhs.(BoolTerm)
 		if !isLhsBool && !isRhsBool {
 			return nil, fmt.Errorf("'%s' operator can only be used with Bool", binary.Op)
 		}
 		switch binary.Op {
 		case "And":
-			return BoolNode{Value: boolLhs.Value && boolRhs.Value}, nil
+			return BoolTerm{Value: boolLhs.Value && boolRhs.Value}, nil
 		case "Or":
-			return BoolNode{Value: boolLhs.Value || boolRhs.Value}, nil
+			return BoolTerm{Value: boolLhs.Value || boolRhs.Value}, nil
 		}
 	}
 
 	return nil, fmt.Errorf("unknown binary operator: '%s'", binary.Op)
 }
 
-func (variable LetNode) Eval(env Environment) (Term, error) {
-	value, valueEvalError := evalNode(variable.Value.(map[string]interface{}), env)
+func (variable LetTerm) Eval(env Environment) (Term, error) {
+	value, valueEvalError := evalNode(variable.Value, env)
 	if valueEvalError != nil {
 		return nil, valueEvalError
 	}
 	env.Set(variable.Identifier, value)
-	nextResult, nextEvalErr := evalNode(variable.Next.(map[string]interface{}), env)
+	nextResult, nextEvalErr := evalNode(variable.Next, env)
 	if nextEvalErr != nil {
 		return nil, nextEvalErr
 	}
 	return nextResult, nil
 }
 
-func (varCall VarNode) Eval(env Environment) (Term, error) {
+func (varCall VarTerm) Eval(env Environment) (Term, error) {
 	value, exists := env.Get(varCall.Text)
 	if !exists {
 		return nil, fmt.Errorf("calling an undeclared variable: %s", varCall.Text)
@@ -229,24 +229,24 @@ func (varCall VarNode) Eval(env Environment) (Term, error) {
 	return value, nil
 }
 
-func (tuple TupleNode) Eval(env Environment) (TupleNode, error) {
+func (tuple TupleTerm) Eval(env Environment) (TupleTerm, error) {
 	first, firstEvalErr := evalNode(tuple.First.(map[string]interface{}), env)
 	if firstEvalErr != nil {
-		return TupleNode{}, nil
+		return TupleTerm{}, nil
 	}
 	second, secondEvalErr := evalNode(tuple.Second.(map[string]interface{}), env)
 	if secondEvalErr != nil {
-		return TupleNode{}, nil
+		return TupleTerm{}, nil
 	}
-	return TupleNode{First: first, Second: second}, nil
+	return TupleTerm{First: first, Second: second}, nil
 }
 
 func (tupleFunc TupleFunction) Eval(env Environment) (Term, error) {
-	value, err := evalNode(tupleFunc.Value.(map[string]interface{}), env)
+	value, err := evalNode(tupleFunc.Value, env)
 	if err != nil {
 		return nil, err
 	}
-	tuple, isTuple := value.(TupleNode)
+	tuple, isTuple := value.(TupleTerm)
 	if !isTuple {
 		return nil, fmt.Errorf("'%s' only accepts Tuples", tupleFunc.Kind)
 	}
@@ -256,31 +256,31 @@ func (tupleFunc TupleFunction) Eval(env Environment) (Term, error) {
 	return tuple.First, nil
 }
 
-func (ifTerm IfNode) Eval(env Environment) (Term, error) {
-	conditionNode, conditionEvalErr := evalNode(ifTerm.Condition.(map[string]interface{}), env)
+func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
+	conditionTerm, conditionEvalErr := evalNode(ifTerm.Condition, env)
 	if conditionEvalErr != nil {
 		return nil, conditionEvalErr
 	}
-	condition, isBool := conditionNode.(BoolNode)
+	condition, isBool := conditionTerm.(BoolTerm)
 	if !isBool {
 		return nil, fmt.Errorf("'If' only accepts Bools as condition")
 	}
 
-	var body Term
+	var body Object
 	if condition.Value {
 		body = ifTerm.Then
 	} else {
 		body = ifTerm.Else
 	}
 
-	result, bodyEvalErr := evalNode(body.(map[string]interface{}), env)
+	result, bodyEvalErr := evalNode(body, env)
 	if bodyEvalErr != nil {
 		return nil, bodyEvalErr
 	}
 	return result, nil
 }
 
-func (function FunctionNode) captureEnv(env Environment) {
+func (function FunctionTerm) captureEnv(env Environment) {
 	for key, value := range env.SymbolTable {
 		if _, exists := function.Env.Get(key); exists {
 			continue
@@ -289,7 +289,7 @@ func (function FunctionNode) captureEnv(env Environment) {
 	}
 }
 
-func (function FunctionNode) setParameters(arguments []interface{}, env Environment) error {
+func (function FunctionTerm) setParameters(arguments []interface{}, env Environment) error {
 	if len(function.Parameters) != len(arguments) {
 		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(arguments))
 	}
@@ -301,11 +301,11 @@ func (function FunctionNode) setParameters(arguments []interface{}, env Environm
 			return fmt.Errorf("malformed parameter in index %d", argIndex)
 		}
 
-		argumentNode, hasArgument := arguments[argIndex].(map[string]interface{})
+		argumentTerm, hasArgument := arguments[argIndex].(map[string]interface{})
 		if !hasArgument {
 			return fmt.Errorf("malformed argument in index %d", argIndex)
 		}
-		argument, evalErr := evalNode(argumentNode, env)
+		argument, evalErr := evalNode(argumentTerm, env)
 		if evalErr != nil {
 			return evalErr
 		}
@@ -318,13 +318,13 @@ func (function FunctionNode) setParameters(arguments []interface{}, env Environm
 	return nil
 }
 
-func (call CallNode) Eval(env Environment) (Term, error) {
-	calleeNode := call.Callee.(map[string]interface{})
-	callee, calleeEvalErr := evalNode(calleeNode, env)
+func (call CallTerm) Eval(env Environment) (Term, error) {
+	calleeTerm := call.Callee
+	callee, calleeEvalErr := evalNode(calleeTerm, env)
 	if calleeEvalErr != nil {
 		return nil, calleeEvalErr
 	}
-	function, isFunction := callee.(FunctionNode)
+	function, isFunction := callee.(FunctionTerm)
 	if !isFunction {
 		return nil, fmt.Errorf("'Call' can only call Functions")
 	}
@@ -336,7 +336,7 @@ func (call CallNode) Eval(env Environment) (Term, error) {
 	}
 	function.captureEnv(env)
 
-	result, resultEvalErr := evalNode(function.Value.(map[string]interface{}), function.Env)
+	result, resultEvalErr := evalNode(function.Value, function.Env)
 	if resultEvalErr != nil {
 		return nil, resultEvalErr
 	}
