@@ -40,19 +40,19 @@ func (node TupleTerm) String() string {
 
 type TupleFunction struct {
 	Kind  string
-	Value Object
+	Value Term
 }
 
 type BinaryTerm struct {
-	Lhs Object
+	Lhs Term
 	Op  string
-	Rhs Object
+	Rhs Term
 }
 
 type LetTerm struct {
 	Identifier string
-	Value      Object
-	Next       Object
+	Value      Term
+	Next       Term
 }
 
 type VarTerm struct {
@@ -60,18 +60,18 @@ type VarTerm struct {
 }
 
 type PrintTerm struct {
-	Value Object
+	Value Term
 }
 
 type IfTerm struct {
-	Condition Object
-	Then      Object
-	Else      Object
+	Condition Term
+	Then      Term
+	Else      Term
 }
 
 type FunctionTerm struct {
-	Parameters []interface{}
-	Value      Object
+	Parameters []string
+	Value      Term
 	Env        Environment
 }
 
@@ -80,6 +80,6 @@ func (node FunctionTerm) String() string {
 }
 
 type CallTerm struct {
-	Arguments []interface{}
-	Callee    Object
+	Arguments []Term
+	Callee    Term
 }

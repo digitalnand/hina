@@ -1,12 +1,12 @@
 package hina
 
 type Environment struct {
-	SymbolTable map[string]interface{}
+	SymbolTable map[string]Term
 }
 
 func NewEnvironment() Environment {
 	var env Environment
-	env.SymbolTable = make(map[string]interface{})
+	env.SymbolTable = make(map[string]Term)
 	return env
 }
 

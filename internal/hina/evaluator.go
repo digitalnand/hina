@@ -10,116 +10,87 @@ func EvalTree(tree Object, env Environment) error {
 	if !exists || len(expression) == 0 {
 		return fmt.Errorf("tree has no expressions")
 	}
-	_, err := evalNode(expression, env)
-	if err != nil {
-		return err
+	term, inspectErr := InspectNode(expression)
+	if inspectErr != nil {
+		return inspectErr
+	}
+	_, evalErr := evalTerm(term, env)
+	if evalErr != nil {
+		return evalErr
 	}
 	return nil
 }
 
-func evalNode(node Object, env Environment) (Term, error) {
-	kind := node["kind"]
-
-	switch kind {
-	case "Str", "Int", "Bool":
-		literal, err := inspectLiteral(node)
+func evalTerm(term Term, env Environment) (Term, error) {
+	switch termType := term.(type) {
+	case StrTerm, IntTerm, BoolTerm:
+		return term, nil
+	case PrintTerm:
+		print := term.(PrintTerm)
+		returnTerm, err := print.Eval(env)
 		if err != nil {
 			return nil, err
-		}
-		return literal, nil
-	case "Print":
-		print, inspectErr := inspectPrint(node)
-		if inspectErr != nil {
-			return nil, inspectErr
-		}
-		returnTerm, evalErr := print.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
 		}
 		return returnTerm, nil
-	case "Binary":
-		binary, inspectErr := inspectBinary(node)
-		if inspectErr != nil {
-			return nil, inspectErr
-		}
-		result, evalErr := binary.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
-		}
-		return result, nil
-	case "Let":
-		let, inspectErr := inspectLet(node)
-		if inspectErr != nil {
-			return nil, inspectErr
-		}
-		nextResult, evalErr := let.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
-		}
-		return nextResult, nil
-	case "Var":
-		varTerm, inspectErr := inspectVar(node)
-		if inspectErr != nil {
-			return nil, inspectErr
-		}
-		value, evalErr := varTerm.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
-		}
-		return value, nil
-	case "Tuple":
-		tuple, err := inspectTuple(node)
+	case BinaryTerm:
+		binary := term.(BinaryTerm)
+		result, err := binary.Eval(env)
 		if err != nil {
 			return nil, err
 		}
-		tuple, err = tuple.Eval(env)
+		return result, nil
+	case LetTerm:
+		let := term.(LetTerm)
+		nextResult, err := let.Eval(env)
+		if err != nil {
+			return nil, err
+		}
+		return nextResult, nil
+	case VarTerm:
+		varTerm := term.(VarTerm)
+		value, err := varTerm.Eval(env)
+		if err != nil {
+			return nil, err
+		}
+		return value, nil
+	case TupleTerm:
+		tupleTerm := term.(TupleTerm)
+		tuple, err := tupleTerm.Eval(env)
 		if err != nil {
 			return nil, err
 		}
 		return tuple, nil
-	case "First", "Second":
-		tupleFunc, inspectErr := inspectTupleFunction(node)
-		if inspectErr != nil {
-			return nil, inspectErr
-		}
-		value, evalErr := tupleFunc.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
-		}
-		return value, nil
-	case "If":
-		ifTerm, inspectErr := inspectIf(node)
-		if inspectErr != nil {
-			return nil, inspectErr
-		}
-		result, evalErr := ifTerm.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
-		}
-		return result, nil
-	case "Function":
-		function, err := inspectFunction(node)
+	case TupleFunction:
+		tupleFunc := term.(TupleFunction)
+		value, err := tupleFunc.Eval(env)
 		if err != nil {
 			return nil, err
 		}
-		return function, nil
-	case "Call":
-		call, inspectTerm := inspectCall(node)
-		if inspectTerm != nil {
-			return nil, inspectTerm
-		}
-		result, evalErr := call.Eval(env)
-		if evalErr != nil {
-			return nil, evalErr
+		return value, nil
+	case IfTerm:
+		ifTerm := term.(IfTerm)
+		result, err := ifTerm.Eval(env)
+		if err != nil {
+			return nil, err
 		}
 		return result, nil
+	case FunctionTerm:
+		function := term.(FunctionTerm)
+		return function, nil
+	case CallTerm:
+		call := term.(CallTerm)
+		result, err := call.Eval(env)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	default:
+		return nil, fmt.Errorf("unknown term: %s", termType)
 	}
-
-	return nil, fmt.Errorf("unknown term: %s", kind)
 }
 
 func (print PrintTerm) Eval(env Environment) (Term, error) {
-	value, err := evalNode(print.Value, env)
+	value, err := evalTerm(print.Value, env)
 	if err != nil {
 		return nil, err
 	}
@@ -128,11 +99,11 @@ func (print PrintTerm) Eval(env Environment) (Term, error) {
 }
 
 func (binary BinaryTerm) Eval(env Environment) (Term, error) {
-	lhs, lhsEvalErr := evalNode(binary.Lhs, env)
+	lhs, lhsEvalErr := evalTerm(binary.Lhs, env)
 	if lhsEvalErr != nil {
 		return nil, lhsEvalErr
 	}
-	rhs, rhsEvalErr := evalNode(binary.Rhs, env)
+	rhs, rhsEvalErr := evalTerm(binary.Rhs, env)
 	if rhsEvalErr != nil {
 		return nil, rhsEvalErr
 	}
@@ -209,12 +180,13 @@ func (binary BinaryTerm) Eval(env Environment) (Term, error) {
 }
 
 func (variable LetTerm) Eval(env Environment) (Term, error) {
-	value, valueEvalError := evalNode(variable.Value, env)
+	value, valueEvalError := evalTerm(variable.Value, env)
 	if valueEvalError != nil {
 		return nil, valueEvalError
 	}
 	env.Set(variable.Identifier, value)
-	nextResult, nextEvalErr := evalNode(variable.Next, env)
+
+	nextResult, nextEvalErr := evalTerm(variable.Next, env)
 	if nextEvalErr != nil {
 		return nil, nextEvalErr
 	}
@@ -230,11 +202,11 @@ func (varCall VarTerm) Eval(env Environment) (Term, error) {
 }
 
 func (tuple TupleTerm) Eval(env Environment) (TupleTerm, error) {
-	first, firstEvalErr := evalNode(tuple.First.(map[string]interface{}), env)
+	first, firstEvalErr := evalTerm(tuple.First, env)
 	if firstEvalErr != nil {
 		return TupleTerm{}, nil
 	}
-	second, secondEvalErr := evalNode(tuple.Second.(map[string]interface{}), env)
+	second, secondEvalErr := evalTerm(tuple.Second, env)
 	if secondEvalErr != nil {
 		return TupleTerm{}, nil
 	}
@@ -242,7 +214,7 @@ func (tuple TupleTerm) Eval(env Environment) (TupleTerm, error) {
 }
 
 func (tupleFunc TupleFunction) Eval(env Environment) (Term, error) {
-	value, err := evalNode(tupleFunc.Value, env)
+	value, err := evalTerm(tupleFunc.Value, env)
 	if err != nil {
 		return nil, err
 	}
@@ -250,14 +222,15 @@ func (tupleFunc TupleFunction) Eval(env Environment) (Term, error) {
 	if !isTuple {
 		return nil, fmt.Errorf("'%s' only accepts Tuples", tupleFunc.Kind)
 	}
-	if tupleFunc.Kind == "Second" {
+	if tupleFunc.Kind == "First" {
+		return tuple.First, nil
+	} else {
 		return tuple.Second, nil
 	}
-	return tuple.First, nil
 }
 
 func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
-	conditionTerm, conditionEvalErr := evalNode(ifTerm.Condition, env)
+	conditionTerm, conditionEvalErr := evalTerm(ifTerm.Condition, env)
 	if conditionEvalErr != nil {
 		return nil, conditionEvalErr
 	}
@@ -266,14 +239,14 @@ func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
 		return nil, fmt.Errorf("'If' only accepts Bools as condition")
 	}
 
-	var body Object
+	var body Term
 	if condition.Value {
 		body = ifTerm.Then
 	} else {
 		body = ifTerm.Else
 	}
 
-	result, bodyEvalErr := evalNode(body, env)
+	result, bodyEvalErr := evalTerm(body, env)
 	if bodyEvalErr != nil {
 		return nil, bodyEvalErr
 	}
@@ -289,27 +262,17 @@ func (function FunctionTerm) captureEnv(env Environment) {
 	}
 }
 
-func (function FunctionTerm) setParameters(arguments []interface{}, env Environment) error {
+func (function FunctionTerm) setParameters(arguments []Term, env Environment) error {
 	if len(function.Parameters) != len(arguments) {
 		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(arguments))
 	}
 
 	for argIndex := 0; argIndex < len(arguments); argIndex++ {
-		parameter, hasParameter := function.Parameters[argIndex].(map[string]interface{})
-		parameterName, parameterHasName := parameter["text"].(string)
-		if !hasParameter || !parameterHasName {
-			return fmt.Errorf("malformed parameter in index %d", argIndex)
+		parameterName := function.Parameters[argIndex]
+		argument, err := evalTerm(arguments[argIndex], env)
+		if err != nil {
+			return err
 		}
-
-		argumentTerm, hasArgument := arguments[argIndex].(map[string]interface{})
-		if !hasArgument {
-			return fmt.Errorf("malformed argument in index %d", argIndex)
-		}
-		argument, evalErr := evalNode(argumentTerm, env)
-		if evalErr != nil {
-			return evalErr
-		}
-
 		if _, exists := function.Env.Get(parameterName); exists {
 			return fmt.Errorf("mixed parameter: %s", parameterName)
 		}
@@ -320,7 +283,7 @@ func (function FunctionTerm) setParameters(arguments []interface{}, env Environm
 
 func (call CallTerm) Eval(env Environment) (Term, error) {
 	calleeTerm := call.Callee
-	callee, calleeEvalErr := evalNode(calleeTerm, env)
+	callee, calleeEvalErr := evalTerm(calleeTerm, env)
 	if calleeEvalErr != nil {
 		return nil, calleeEvalErr
 	}
@@ -336,7 +299,7 @@ func (call CallTerm) Eval(env Environment) (Term, error) {
 	}
 	function.captureEnv(env)
 
-	result, resultEvalErr := evalNode(function.Value, function.Env)
+	result, resultEvalErr := evalTerm(function.Value, function.Env)
 	if resultEvalErr != nil {
 		return nil, resultEvalErr
 	}
