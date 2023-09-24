@@ -12,6 +12,5 @@ RUN tar -xf /tmp/go1.21.1.linux-amd64.tar.gz -C /usr/local/
 RUN ln -s /usr/local/go/bin/go /usr/local/bin/go
 
 RUN make
-COPY files/fib.json /var/rinha/source.rinha.json
 
-ENTRYPOINT ["bin/hina/hina", "/var/rinha/source.rinha.json"]
+CMD ["bin/hina/hina", "/var/rinha/source.rinha.json"]
