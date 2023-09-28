@@ -2,6 +2,7 @@ package hina
 
 import (
 	"fmt"
+	"math"
 	"reflect"
 )
 
@@ -131,7 +132,7 @@ func (binary BinaryTerm) Eval(env Environment) (Term, error) {
 	case "Sub", "Mul", "Div", "Rem":
 		intLhs, isLhsInt := lhs.(IntTerm)
 		intRhs, isRhsInt := rhs.(IntTerm)
-		if !isLhsInt && !isRhsInt {
+		if !isLhsInt || !isRhsInt {
 			return nil, fmt.Errorf("'%s' operator can only be used with Ints", binary.Op)
 		}
 		switch binary.Op {
@@ -142,7 +143,7 @@ func (binary BinaryTerm) Eval(env Environment) (Term, error) {
 		case "Div":
 			return IntTerm{Value: intLhs.Value / intRhs.Value}, nil
 		case "Rem":
-			return IntTerm{Value: intLhs.Value % intRhs.Value}, nil
+			return IntTerm{Value: math.Mod(intLhs.Value, intRhs.Value)}, nil
 		}
 	case "Eq", "Neq":
 		hasSameValue := lhs == rhs
@@ -156,7 +157,7 @@ func (binary BinaryTerm) Eval(env Environment) (Term, error) {
 	case "Lt", "Gt", "Lte", "Gte":
 		intLhs, isLhsInt := lhs.(IntTerm)
 		intRhs, isRhsInt := rhs.(IntTerm)
-		if !isLhsInt && !isRhsInt {
+		if !isLhsInt || !isRhsInt {
 			return nil, fmt.Errorf("'%s' comparison can only be done with Ints", binary.Op)
 		}
 		switch binary.Op {
@@ -172,7 +173,7 @@ func (binary BinaryTerm) Eval(env Environment) (Term, error) {
 	case "And", "Or":
 		boolLhs, isLhsBool := lhs.(BoolTerm)
 		boolRhs, isRhsBool := rhs.(BoolTerm)
-		if !isLhsBool && !isRhsBool {
+		if !isLhsBool || !isRhsBool {
 			return nil, fmt.Errorf("'%s' operator can only be used with Bool", binary.Op)
 		}
 		switch binary.Op {
@@ -248,7 +249,7 @@ func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
 
 func (call CallTerm) insertArgs(function FunctionTerm, env Environment) error {
 	if len(function.Parameters) != len(call.Arguments) {
-		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(call.Arguments))
+		return fmt.Errorf("%s expected %d arguments, received %d", call.FunctionCalled, len(function.Parameters), len(call.Arguments))
 	}
 	for index := 0; index < len(call.Arguments); index++ {
 		parameter := function.Parameters[index]

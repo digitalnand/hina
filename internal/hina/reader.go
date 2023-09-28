@@ -276,11 +276,11 @@ func inspectLiteral(node Object) (Term, error) {
 	case "Str":
 		result = StrTerm{Value: valueStr}
 	case "Int":
-		num, err := strconv.Atoi(valueStr)
+		num, err := strconv.ParseFloat(valueStr, 64)
 		if err != nil {
 			return nil, err
 		}
-		result = IntTerm{Value: int32(num)}
+		result = IntTerm{Value: num}
 	case "Bool":
 		boolValue, err := strconv.ParseBool(valueStr)
 		if err != nil {

@@ -14,11 +14,11 @@ func (node StrTerm) String() string {
 }
 
 type IntTerm struct {
-	Value int32
+	Value float64
 }
 
 func (node IntTerm) String() string {
-	return fmt.Sprintf("%d", node.Value)
+	return fmt.Sprintf("%d", int(node.Value))
 }
 
 type BoolTerm struct {
