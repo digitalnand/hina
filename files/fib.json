@@ -30,8 +30,8 @@
             "kind": "Var",
             "text": "n",
             "location": {
-              "start": 28,
-              "end": 29,
+              "start": 30,
+              "end": 31,
               "filename": "files/fib.rinha"
             }
           },
@@ -40,14 +40,14 @@
             "kind": "Int",
             "value": 2,
             "location": {
-              "start": 32,
-              "end": 33,
+              "start": 34,
+              "end": 35,
               "filename": "files/fib.rinha"
             }
           },
           "location": {
-            "start": 28,
-            "end": 33,
+            "start": 30,
+            "end": 35,
             "filename": "files/fib.rinha"
           }
         },
@@ -55,8 +55,8 @@
           "kind": "Var",
           "text": "n",
           "location": {
-            "start": 41,
-            "end": 42,
+            "start": 47,
+            "end": 48,
             "filename": "files/fib.rinha"
           }
         },
@@ -68,8 +68,8 @@
               "kind": "Var",
               "text": "fib",
               "location": {
-                "start": 58,
-                "end": 61,
+                "start": 70,
+                "end": 73,
                 "filename": "files/fib.rinha"
               }
             },
@@ -80,8 +80,8 @@
                   "kind": "Var",
                   "text": "n",
                   "location": {
-                    "start": 62,
-                    "end": 63,
+                    "start": 74,
+                    "end": 75,
                     "filename": "files/fib.rinha"
                   }
                 },
@@ -90,21 +90,21 @@
                   "kind": "Int",
                   "value": 1,
                   "location": {
-                    "start": 66,
-                    "end": 67,
+                    "start": 78,
+                    "end": 79,
                     "filename": "files/fib.rinha"
                   }
                 },
                 "location": {
-                  "start": 62,
-                  "end": 67,
+                  "start": 74,
+                  "end": 79,
                   "filename": "files/fib.rinha"
                 }
               }
             ],
             "location": {
-              "start": 58,
-              "end": 68,
+              "start": 70,
+              "end": 80,
               "filename": "files/fib.rinha"
             }
           },
@@ -115,8 +115,8 @@
               "kind": "Var",
               "text": "fib",
               "location": {
-                "start": 71,
-                "end": 74,
+                "start": 83,
+                "end": 86,
                 "filename": "files/fib.rinha"
               }
             },
@@ -127,8 +127,8 @@
                   "kind": "Var",
                   "text": "n",
                   "location": {
-                    "start": 75,
-                    "end": 76,
+                    "start": 87,
+                    "end": 88,
                     "filename": "files/fib.rinha"
                   }
                 },
@@ -137,39 +137,39 @@
                   "kind": "Int",
                   "value": 2,
                   "location": {
-                    "start": 79,
-                    "end": 80,
+                    "start": 91,
+                    "end": 92,
                     "filename": "files/fib.rinha"
                   }
                 },
                 "location": {
-                  "start": 75,
-                  "end": 80,
+                  "start": 87,
+                  "end": 92,
                   "filename": "files/fib.rinha"
                 }
               }
             ],
             "location": {
-              "start": 71,
-              "end": 81,
+              "start": 83,
+              "end": 93,
               "filename": "files/fib.rinha"
             }
           },
           "location": {
-            "start": 58,
-            "end": 81,
+            "start": 70,
+            "end": 93,
             "filename": "files/fib.rinha"
           }
         },
         "location": {
-          "start": 24,
-          "end": 85,
+          "start": 26,
+          "end": 99,
           "filename": "files/fib.rinha"
         }
       },
       "location": {
         "start": 10,
-        "end": 87,
+        "end": 101,
         "filename": "files/fib.rinha"
       }
     },
@@ -181,8 +181,8 @@
           "kind": "Var",
           "text": "fib",
           "location": {
-            "start": 96,
-            "end": 99,
+            "start": 109,
+            "end": 112,
             "filename": "files/fib.rinha"
           }
         },
@@ -191,33 +191,33 @@
             "kind": "Int",
             "value": 10,
             "location": {
-              "start": 100,
-              "end": 102,
+              "start": 113,
+              "end": 115,
               "filename": "files/fib.rinha"
             }
           }
         ],
         "location": {
-          "start": 96,
-          "end": 103,
+          "start": 109,
+          "end": 116,
           "filename": "files/fib.rinha"
         }
       },
       "location": {
-        "start": 90,
-        "end": 104,
+        "start": 103,
+        "end": 117,
         "filename": "files/fib.rinha"
       }
     },
     "location": {
       "start": 0,
-      "end": 104,
+      "end": 117,
       "filename": "files/fib.rinha"
     }
   },
   "location": {
     "start": 0,
-    "end": 104,
+    "end": 117,
     "filename": "files/fib.rinha"
   }
 }

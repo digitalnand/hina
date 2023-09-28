@@ -1,5 +1,5 @@
 {
-  "name": "files/binaryOp.rinha",
+  "name": "files/tests/binaryOp.rinha",
   "expression": {
     "kind": "Print",
     "value": {
@@ -14,7 +14,7 @@
             "location": {
               "start": 12,
               "end": 13,
-              "filename": "files/binaryOp.rinha"
+              "filename": "files/tests/binaryOp.rinha"
             }
           },
           "op": "Gte",
@@ -24,19 +24,19 @@
             "location": {
               "start": 17,
               "end": 18,
-              "filename": "files/binaryOp.rinha"
+              "filename": "files/tests/binaryOp.rinha"
             }
           },
           "location": {
             "start": 12,
             "end": 18,
-            "filename": "files/binaryOp.rinha"
+            "filename": "files/tests/binaryOp.rinha"
           }
         },
         "location": {
           "start": 6,
           "end": 19,
-          "filename": "files/binaryOp.rinha"
+          "filename": "files/tests/binaryOp.rinha"
         }
       },
       "op": "And",
@@ -52,7 +52,7 @@
               "location": {
                 "start": 29,
                 "end": 30,
-                "filename": "files/binaryOp.rinha"
+                "filename": "files/tests/binaryOp.rinha"
               }
             },
             "op": "Div",
@@ -62,13 +62,13 @@
               "location": {
                 "start": 33,
                 "end": 34,
-                "filename": "files/binaryOp.rinha"
+                "filename": "files/tests/binaryOp.rinha"
               }
             },
             "location": {
               "start": 29,
               "end": 34,
-              "filename": "files/binaryOp.rinha"
+              "filename": "files/tests/binaryOp.rinha"
             }
           },
           "op": "Eq",
@@ -78,36 +78,36 @@
             "location": {
               "start": 38,
               "end": 39,
-              "filename": "files/binaryOp.rinha"
+              "filename": "files/tests/binaryOp.rinha"
             }
           },
           "location": {
             "start": 29,
             "end": 39,
-            "filename": "files/binaryOp.rinha"
+            "filename": "files/tests/binaryOp.rinha"
           }
         },
         "location": {
           "start": 23,
           "end": 40,
-          "filename": "files/binaryOp.rinha"
+          "filename": "files/tests/binaryOp.rinha"
         }
       },
       "location": {
         "start": 6,
         "end": 40,
-        "filename": "files/binaryOp.rinha"
+        "filename": "files/tests/binaryOp.rinha"
       }
     },
     "location": {
       "start": 0,
       "end": 41,
-      "filename": "files/binaryOp.rinha"
+      "filename": "files/tests/binaryOp.rinha"
     }
   },
   "location": {
     "start": 0,
     "end": 41,
-    "filename": "files/binaryOp.rinha"
+    "filename": "files/tests/binaryOp.rinha"
   }
 }

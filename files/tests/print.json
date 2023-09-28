@@ -1,5 +1,5 @@
 {
-  "name": "files/print.rinha",
+  "name": "files/tests/print.rinha",
   "expression": {
     "kind": "Print",
     "value": {
@@ -12,30 +12,30 @@
           "location": {
             "start": 18,
             "end": 31,
-            "filename": "files/print.rinha"
+            "filename": "files/tests/print.rinha"
           }
         },
         "location": {
           "start": 12,
           "end": 32,
-          "filename": "files/print.rinha"
+          "filename": "files/tests/print.rinha"
         }
       },
       "location": {
         "start": 6,
         "end": 33,
-        "filename": "files/print.rinha"
+        "filename": "files/tests/print.rinha"
       }
     },
     "location": {
       "start": 0,
       "end": 34,
-      "filename": "files/print.rinha"
+      "filename": "files/tests/print.rinha"
     }
   },
   "location": {
     "start": 0,
     "end": 34,
-    "filename": "files/print.rinha"
+    "filename": "files/tests/print.rinha"
   }
 }

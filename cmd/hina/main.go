@@ -9,15 +9,15 @@ import (
 )
 
 func main() {
-	arguments := os.Args[1:]
-	if len(arguments) == 0 {
+	args := os.Args[1:]
+	if len(args) == 0 {
 		panic("no input files")
 	}
-	if len(arguments) > 1 {
+	if len(args) > 1 {
 		panic("hina can only interpret one file at a time")
 	}
 
-	filePath := arguments[0]
+	filePath := args[0]
 	if filepath.Ext(filePath) != ".json" {
 		panic("file format not recognized")
 	}
@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	env := hina.NewEnvironment()
+	env := hina.NewEnv()
 	err = hina.EvalTree(jsonContent, env)
 	if err != nil {
 		panic(err)

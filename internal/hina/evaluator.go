@@ -7,11 +7,11 @@ import (
 )
 
 func EvalTree(tree Object, env Environment) error {
-	expression, exists := tree["expression"].(map[string]interface{})
-	if !exists || len(expression) == 0 {
+	exp, exists := tree["expression"].(map[string]interface{})
+	if !exists || len(exp) == 0 {
 		return fmt.Errorf("tree has no expressions")
 	}
-	term, inspectErr := InspectNode(expression)
+	term, inspectErr := InspectNode(exp)
 	if inspectErr != nil {
 		return inspectErr
 	}
@@ -249,7 +249,7 @@ func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
 
 func (call CallTerm) insertArgs(function FunctionTerm, env Environment) error {
 	if len(function.Parameters) != len(call.Arguments) {
-		return fmt.Errorf("%s expected %d arguments, received %d", call.FunctionCalled, len(function.Parameters), len(call.Arguments))
+		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(call.Arguments))
 	}
 	for index := 0; index < len(call.Arguments); index++ {
 		parameter := function.Parameters[index]
@@ -272,12 +272,12 @@ func (call CallTerm) Eval(env Environment) (Term, error) {
 	if !isFunction {
 		return nil, fmt.Errorf("'Call' can only call Functions")
 	}
-	parametersErr := call.insertArgs(function, env)
-	if parametersErr != nil {
-		return nil, parametersErr
+	paramsErr := call.insertArgs(function, env)
+	if paramsErr != nil {
+		return nil, paramsErr
 	}
 
-	newEnv := NewEnvironment()
+	newEnv := NewEnv()
 	newEnv.Copy(function.Env)
 	result, resultEvalErr := evalTerm(function.Value, newEnv)
 	if resultEvalErr != nil {

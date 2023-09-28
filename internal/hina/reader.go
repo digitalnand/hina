@@ -45,7 +45,7 @@ func InspectNode(node Object) (Term, error) {
 		}
 		return tuple, nil
 	case "First", "Second":
-		tupleFunc, err := inspectTupleFunction(node)
+		tupleFunc, err := inspectTupleFunc(node)
 		if err != nil {
 			return nil, err
 		}
@@ -74,80 +74,76 @@ func InspectNode(node Object) (Term, error) {
 }
 
 func inspectCall(node Object) (CallTerm, error) {
-	argumentsNode, hasArguments := node["arguments"].([]interface{})
+	argsNode, hasArgs := node["arguments"].([]interface{})
 	calleeNode, hasCallee := node["callee"].(map[string]interface{})
-	functionName, hasFunctionName := calleeNode["text"].(string)
-	if !hasFunctionName {
-		functionName = "anonymous"
-	}
-	if !hasArguments || !hasCallee {
+	if !hasArgs || !hasCallee {
 		return CallTerm{}, fmt.Errorf("'Call' node is badly structured")
 	}
 
-	arguments, argumentsInspectErr := inspectCallArguments(argumentsNode)
-	if argumentsInspectErr != nil {
-		return CallTerm{}, argumentsInspectErr
+	args, argsInspectErr := inspectCallArgs(argsNode)
+	if argsInspectErr != nil {
+		return CallTerm{}, argsInspectErr
 	}
 	callee, calleeInspectErr := InspectNode(calleeNode)
 	if calleeInspectErr != nil {
 		return CallTerm{}, calleeInspectErr
 	}
-	return CallTerm{FunctionCalled: functionName, Arguments: arguments, Callee: callee}, nil
+	return CallTerm{Arguments: args, Callee: callee}, nil
 }
 
-func inspectCallArguments(argumentsNode []interface{}) ([]Term, error) {
-	var arguments []Term
-	for index, argument := range argumentsNode {
-		argumentNode, isNode := argument.(map[string]interface{})
+func inspectCallArgs(argsNode []interface{}) ([]Term, error) {
+	var args []Term
+	for index, item := range argsNode {
+		argNode, isNode := item.(map[string]interface{})
 		if !isNode {
 			return nil, fmt.Errorf("argument in index %d isn't a Node", index)
 		}
-		term, err := InspectNode(argumentNode)
+		argTerm, err := InspectNode(argNode)
 		if err != nil {
 			return nil, err
 		}
-		arguments = append(arguments, term)
+		args = append(args, argTerm)
 	}
-	return arguments, nil
+	return args, nil
 }
 
 func inspectFunction(node Object) (FunctionTerm, error) {
-	parametersNode, hasParameters := node["parameters"].([]interface{})
+	paramsNode, hasParams := node["parameters"].([]interface{})
 	valueNode, hasValue := node["value"].(map[string]interface{})
-	if !hasParameters || !hasValue {
+	if !hasParams || !hasValue {
 		return FunctionTerm{}, fmt.Errorf("'Function' node is badly structured")
 	}
 
-	parameters, parametersInspectErr := inspectFunctionParameters(parametersNode)
-	if parametersInspectErr != nil {
-		return FunctionTerm{}, parametersInspectErr
+	params, paramsInspectErr := inspectFunctionParams(paramsNode)
+	if paramsInspectErr != nil {
+		return FunctionTerm{}, paramsInspectErr
 	}
 	value, valueInspectErr := InspectNode(valueNode)
 	if valueInspectErr != nil {
 		return FunctionTerm{}, valueInspectErr
 	}
-	return FunctionTerm{Parameters: parameters, Value: value, Env: NewEnvironment()}, nil
+	return FunctionTerm{Parameters: params, Value: value, Env: NewEnv()}, nil
 }
 
-func inspectFunctionParameters(parametersNode []interface{}) ([]string, error) {
-	var parameters []string
-	for index, parameter := range parametersNode {
-		parameterNode, isNode := parameter.(map[string]interface{})
+func inspectFunctionParams(paramsNode []interface{}) ([]string, error) {
+	var params []string
+	for index, item := range paramsNode {
+		paramNode, isNode := item.(map[string]interface{})
 		if !isNode {
 			return nil, fmt.Errorf("parameter in index %d isn't a Node", index)
 		}
-		parameterName, exists := parameterNode["text"].(string)
+		param, exists := paramNode["text"].(string)
 		if !exists {
 			return nil, fmt.Errorf("malformed parameter in index %d", index)
 		}
-		for _, parameterIn := range parameters {
-			if parameterIn == parameterName {
-				return nil, fmt.Errorf("mixed parameter: %s", parameterName)
+		for _, paramIn := range params {
+			if paramIn == param {
+				return nil, fmt.Errorf("mixed parameter: %s", param)
 			}
 		}
-		parameters = append(parameters, parameterName)
+		params = append(params, param)
 	}
-	return parameters, nil
+	return params, nil
 }
 
 func inspectIf(node Object) (IfTerm, error) {
@@ -173,7 +169,7 @@ func inspectIf(node Object) (IfTerm, error) {
 	return IfTerm{Condition: condition, Then: then, Else: elseTerm}, nil
 }
 
-func inspectTupleFunction(node Object) (TupleFunction, error) {
+func inspectTupleFunc(node Object) (TupleFunction, error) {
 	kind, hasKind := node["kind"].(string)
 	valueNode, hasValue := node["value"].(map[string]interface{})
 	if !hasValue || !hasKind {
@@ -282,11 +278,11 @@ func inspectLiteral(node Object) (Term, error) {
 		}
 		result = IntTerm{Value: num}
 	case "Bool":
-		boolValue, err := strconv.ParseBool(valueStr)
+		boolVal, err := strconv.ParseBool(valueStr)
 		if err != nil {
 			return nil, err
 		}
-		result = BoolTerm{Value: boolValue}
+		result = BoolTerm{Value: boolVal}
 	}
 	return result, nil
 }

@@ -30,8 +30,8 @@
             "kind": "Var",
             "text": "n",
             "location": {
-              "start": 28,
-              "end": 29,
+              "start": 30,
+              "end": 31,
               "filename": "files/sum.rinha"
             }
           },
@@ -40,14 +40,14 @@
             "kind": "Int",
             "value": 1,
             "location": {
-              "start": 33,
-              "end": 34,
+              "start": 35,
+              "end": 36,
               "filename": "files/sum.rinha"
             }
           },
           "location": {
-            "start": 28,
-            "end": 34,
+            "start": 30,
+            "end": 36,
             "filename": "files/sum.rinha"
           }
         },
@@ -55,8 +55,8 @@
           "kind": "Var",
           "text": "n",
           "location": {
-            "start": 42,
-            "end": 43,
+            "start": 48,
+            "end": 49,
             "filename": "files/sum.rinha"
           }
         },
@@ -66,8 +66,8 @@
             "kind": "Var",
             "text": "n",
             "location": {
-              "start": 59,
-              "end": 60,
+              "start": 71,
+              "end": 72,
               "filename": "files/sum.rinha"
             }
           },
@@ -78,8 +78,8 @@
               "kind": "Var",
               "text": "sum",
               "location": {
-                "start": 63,
-                "end": 66,
+                "start": 75,
+                "end": 78,
                 "filename": "files/sum.rinha"
               }
             },
@@ -90,8 +90,8 @@
                   "kind": "Var",
                   "text": "n",
                   "location": {
-                    "start": 67,
-                    "end": 68,
+                    "start": 79,
+                    "end": 80,
                     "filename": "files/sum.rinha"
                   }
                 },
@@ -100,39 +100,39 @@
                   "kind": "Int",
                   "value": 1,
                   "location": {
-                    "start": 71,
-                    "end": 72,
+                    "start": 83,
+                    "end": 84,
                     "filename": "files/sum.rinha"
                   }
                 },
                 "location": {
-                  "start": 67,
-                  "end": 72,
+                  "start": 79,
+                  "end": 84,
                   "filename": "files/sum.rinha"
                 }
               }
             ],
             "location": {
-              "start": 63,
-              "end": 73,
+              "start": 75,
+              "end": 85,
               "filename": "files/sum.rinha"
             }
           },
           "location": {
-            "start": 59,
-            "end": 73,
+            "start": 71,
+            "end": 85,
             "filename": "files/sum.rinha"
           }
         },
         "location": {
-          "start": 24,
-          "end": 77,
+          "start": 26,
+          "end": 91,
           "filename": "files/sum.rinha"
         }
       },
       "location": {
         "start": 10,
-        "end": 79,
+        "end": 93,
         "filename": "files/sum.rinha"
       }
     },
@@ -144,8 +144,8 @@
           "kind": "Var",
           "text": "sum",
           "location": {
-            "start": 89,
-            "end": 92,
+            "start": 101,
+            "end": 104,
             "filename": "files/sum.rinha"
           }
         },
@@ -154,33 +154,33 @@
             "kind": "Int",
             "value": 5,
             "location": {
-              "start": 93,
-              "end": 94,
+              "start": 105,
+              "end": 106,
               "filename": "files/sum.rinha"
             }
           }
         ],
         "location": {
-          "start": 89,
-          "end": 95,
+          "start": 101,
+          "end": 107,
           "filename": "files/sum.rinha"
         }
       },
       "location": {
-        "start": 82,
-        "end": 96,
+        "start": 95,
+        "end": 108,
         "filename": "files/sum.rinha"
       }
     },
     "location": {
       "start": 0,
-      "end": 96,
+      "end": 108,
       "filename": "files/sum.rinha"
     }
   },
   "location": {
     "start": 0,
-    "end": 96,
+    "end": 108,
     "filename": "files/sum.rinha"
   }
 }

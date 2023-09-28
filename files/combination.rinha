@@ -9,5 +9,4 @@ let combination = fn (n, k) => {
         combination(n - 1, k - 1) + combination(n - 1, k)
     }
 };
-
 print(combination(10, 2))

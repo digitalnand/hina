@@ -4,7 +4,7 @@ type Environment struct {
 	SymbolTable map[string]Term
 }
 
-func NewEnvironment() Environment {
+func NewEnv() Environment {
 	var env Environment
 	env.SymbolTable = make(map[string]Term)
 	return env
@@ -24,9 +24,6 @@ func (env Environment) Set(identifier string, value Term) {
 
 func (env Environment) Copy(target Environment) {
 	for key, value := range target.SymbolTable {
-		if _, exists := env.Get(key); exists {
-			continue
-		}
 		env.Set(key, value)
 	}
 }
