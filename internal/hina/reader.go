@@ -76,8 +76,12 @@ func InspectNode(node Object) (Term, error) {
 func inspectCall(node Object) (CallTerm, error) {
 	argumentsNode, hasArguments := node["arguments"].([]interface{})
 	calleeNode, hasCallee := node["callee"].(map[string]interface{})
+	functionName, hasFunctionName := calleeNode["text"].(string)
+	if !hasFunctionName {
+		functionName = "anonymous"
+	}
 	if !hasArguments || !hasCallee {
-		return CallTerm{}, fmt.Errorf("'Function' node is badly structured")
+		return CallTerm{}, fmt.Errorf("'Call' node is badly structured")
 	}
 
 	arguments, argumentsInspectErr := inspectCallArguments(argumentsNode)
@@ -88,7 +92,7 @@ func inspectCall(node Object) (CallTerm, error) {
 	if calleeInspectErr != nil {
 		return CallTerm{}, calleeInspectErr
 	}
-	return CallTerm{Arguments: arguments, Callee: callee}, nil
+	return CallTerm{FunctionCalled: functionName, Arguments: arguments, Callee: callee}, nil
 }
 
 func inspectCallArguments(argumentsNode []interface{}) ([]Term, error) {
@@ -122,7 +126,7 @@ func inspectFunction(node Object) (FunctionTerm, error) {
 	if valueInspectErr != nil {
 		return FunctionTerm{}, valueInspectErr
 	}
-	return FunctionTerm{Parameters: parameters, Value: value, Env: Environment{}}, nil
+	return FunctionTerm{Parameters: parameters, Value: value, Env: NewEnvironment()}, nil
 }
 
 func inspectFunctionParameters(parametersNode []interface{}) ([]string, error) {
@@ -135,6 +139,11 @@ func inspectFunctionParameters(parametersNode []interface{}) ([]string, error) {
 		parameterName, exists := parameterNode["text"].(string)
 		if !exists {
 			return nil, fmt.Errorf("malformed parameter in index %d", index)
+		}
+		for _, parameterIn := range parameters {
+			if parameterIn == parameterName {
+				return nil, fmt.Errorf("mixed parameter: %s", parameterName)
+			}
 		}
 		parameters = append(parameters, parameterName)
 	}

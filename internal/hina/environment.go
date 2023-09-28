@@ -21,3 +21,12 @@ func (env Environment) Get(identifier string) (Term, bool) {
 func (env Environment) Set(identifier string, value Term) {
 	env.SymbolTable[identifier] = value
 }
+
+func (env Environment) Copy(target Environment) {
+	for key, value := range target.SymbolTable {
+		if _, exists := env.Get(key); exists {
+			continue
+		}
+		env.Set(key, value)
+	}
+}

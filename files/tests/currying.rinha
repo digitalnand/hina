@@ -1,0 +1,8 @@
+let x = "Hey!";
+let message = fn(x) => {
+    fn(y) => {
+        x + " " + y
+    }
+};
+let hello = message("Hello");
+print(x + " " + hello("Hina!"))

@@ -54,11 +54,17 @@ func evalTerm(term Term, env Environment) (Term, error) {
 		}
 		return value, nil
 	case TupleTerm:
-		tupleTerm := term.(TupleTerm)
-		tuple, err := tupleTerm.Eval(env)
-		if err != nil {
-			return nil, err
+		tuple := term.(TupleTerm)
+		first, firstEvalErr := evalTerm(tuple.First, env)
+		if firstEvalErr != nil {
+			return nil, firstEvalErr
 		}
+		second, secondEvalErr := evalTerm(tuple.Second, env)
+		if secondEvalErr != nil {
+			return nil, secondEvalErr
+		}
+		tuple.First = first
+		tuple.Second = second
 		return tuple, nil
 	case TupleFunction:
 		tupleFunc := term.(TupleFunction)
@@ -76,6 +82,7 @@ func evalTerm(term Term, env Environment) (Term, error) {
 		return result, nil
 	case FunctionTerm:
 		function := term.(FunctionTerm)
+		function.Env.Copy(env)
 		return function, nil
 	case CallTerm:
 		call := term.(CallTerm)
@@ -180,12 +187,7 @@ func (binary BinaryTerm) Eval(env Environment) (Term, error) {
 }
 
 func (variable LetTerm) Eval(env Environment) (Term, error) {
-	value, valueEvalError := evalTerm(variable.Value, env)
-	if valueEvalError != nil {
-		return nil, valueEvalError
-	}
-	env.Set(variable.Identifier, value)
-
+	env.Set(variable.Identifier, variable.Value)
 	nextResult, nextEvalErr := evalTerm(variable.Next, env)
 	if nextEvalErr != nil {
 		return nil, nextEvalErr
@@ -194,23 +196,15 @@ func (variable LetTerm) Eval(env Environment) (Term, error) {
 }
 
 func (varCall VarTerm) Eval(env Environment) (Term, error) {
-	value, exists := env.Get(varCall.Text)
+	valueTerm, exists := env.Get(varCall.Text)
 	if !exists {
 		return nil, fmt.Errorf("calling an undeclared variable: %s", varCall.Text)
 	}
+	value, err := evalTerm(valueTerm, env)
+	if err != nil {
+		return nil, err
+	}
 	return value, nil
-}
-
-func (tuple TupleTerm) Eval(env Environment) (TupleTerm, error) {
-	first, firstEvalErr := evalTerm(tuple.First, env)
-	if firstEvalErr != nil {
-		return TupleTerm{}, nil
-	}
-	second, secondEvalErr := evalTerm(tuple.Second, env)
-	if secondEvalErr != nil {
-		return TupleTerm{}, nil
-	}
-	return TupleTerm{First: first, Second: second}, nil
 }
 
 func (tupleFunc TupleFunction) Eval(env Environment) (Term, error) {
@@ -245,7 +239,6 @@ func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
 	} else {
 		body = ifTerm.Else
 	}
-
 	result, bodyEvalErr := evalTerm(body, env)
 	if bodyEvalErr != nil {
 		return nil, bodyEvalErr
@@ -253,30 +246,17 @@ func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
 	return result, nil
 }
 
-func (function FunctionTerm) captureEnv(env Environment) {
-	for key, value := range env.SymbolTable {
-		if _, exists := function.Env.Get(key); exists {
-			continue
-		}
-		function.Env.Set(key, value)
+func (call CallTerm) insertArgs(function FunctionTerm, env Environment) error {
+	if len(function.Parameters) != len(call.Arguments) {
+		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(call.Arguments))
 	}
-}
-
-func (function FunctionTerm) setParameters(arguments []Term, env Environment) error {
-	if len(function.Parameters) != len(arguments) {
-		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(arguments))
-	}
-
-	for argIndex := 0; argIndex < len(arguments); argIndex++ {
-		parameterName := function.Parameters[argIndex]
-		argument, err := evalTerm(arguments[argIndex], env)
+	for index := 0; index < len(call.Arguments); index++ {
+		parameter := function.Parameters[index]
+		argument, err := evalTerm(call.Arguments[index], env)
 		if err != nil {
 			return err
 		}
-		if _, exists := function.Env.Get(parameterName); exists {
-			return fmt.Errorf("mixed parameter: %s", parameterName)
-		}
-		function.Env.Set(parameterName, argument)
+		function.Env.Set(parameter, argument)
 	}
 	return nil
 }
@@ -291,15 +271,14 @@ func (call CallTerm) Eval(env Environment) (Term, error) {
 	if !isFunction {
 		return nil, fmt.Errorf("'Call' can only call Functions")
 	}
-
-	function.Env = NewEnvironment()
-	parametersErr := function.setParameters(call.Arguments, env)
+	parametersErr := call.insertArgs(function, env)
 	if parametersErr != nil {
 		return nil, parametersErr
 	}
-	function.captureEnv(env)
 
-	result, resultEvalErr := evalTerm(function.Value, function.Env)
+	newEnv := NewEnvironment()
+	newEnv.Copy(function.Env)
+	result, resultEvalErr := evalTerm(function.Value, newEnv)
 	if resultEvalErr != nil {
 		return nil, resultEvalErr
 	}

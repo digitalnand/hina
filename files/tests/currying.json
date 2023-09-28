@@ -1,0 +1,246 @@
+{
+  "name": "files/tests/currying.rinha",
+  "expression": {
+    "kind": "Let",
+    "name": {
+      "text": "x",
+      "location": {
+        "start": 4,
+        "end": 5,
+        "filename": "files/tests/currying.rinha"
+      }
+    },
+    "value": {
+      "kind": "Str",
+      "value": "Hey!",
+      "location": {
+        "start": 8,
+        "end": 14,
+        "filename": "files/tests/currying.rinha"
+      }
+    },
+    "next": {
+      "kind": "Let",
+      "name": {
+        "text": "message",
+        "location": {
+          "start": 20,
+          "end": 27,
+          "filename": "files/tests/currying.rinha"
+        }
+      },
+      "value": {
+        "kind": "Function",
+        "parameters": [
+          {
+            "text": "x",
+            "location": {
+              "start": 33,
+              "end": 34,
+              "filename": "files/tests/currying.rinha"
+            }
+          }
+        ],
+        "value": {
+          "kind": "Function",
+          "parameters": [
+            {
+              "text": "y",
+              "location": {
+                "start": 48,
+                "end": 49,
+                "filename": "files/tests/currying.rinha"
+              }
+            }
+          ],
+          "value": {
+            "kind": "Binary",
+            "lhs": {
+              "kind": "Var",
+              "text": "x",
+              "location": {
+                "start": 64,
+                "end": 65,
+                "filename": "files/tests/currying.rinha"
+              }
+            },
+            "op": "Add",
+            "rhs": {
+              "kind": "Binary",
+              "lhs": {
+                "kind": "Str",
+                "value": " ",
+                "location": {
+                  "start": 68,
+                  "end": 71,
+                  "filename": "files/tests/currying.rinha"
+                }
+              },
+              "op": "Add",
+              "rhs": {
+                "kind": "Var",
+                "text": "y",
+                "location": {
+                  "start": 74,
+                  "end": 75,
+                  "filename": "files/tests/currying.rinha"
+                }
+              },
+              "location": {
+                "start": 68,
+                "end": 75,
+                "filename": "files/tests/currying.rinha"
+              }
+            },
+            "location": {
+              "start": 64,
+              "end": 75,
+              "filename": "files/tests/currying.rinha"
+            }
+          },
+          "location": {
+            "start": 45,
+            "end": 81,
+            "filename": "files/tests/currying.rinha"
+          }
+        },
+        "location": {
+          "start": 30,
+          "end": 83,
+          "filename": "files/tests/currying.rinha"
+        }
+      },
+      "next": {
+        "kind": "Let",
+        "name": {
+          "text": "hello",
+          "location": {
+            "start": 89,
+            "end": 94,
+            "filename": "files/tests/currying.rinha"
+          }
+        },
+        "value": {
+          "kind": "Call",
+          "callee": {
+            "kind": "Var",
+            "text": "message",
+            "location": {
+              "start": 97,
+              "end": 104,
+              "filename": "files/tests/currying.rinha"
+            }
+          },
+          "arguments": [
+            {
+              "kind": "Str",
+              "value": "Hello",
+              "location": {
+                "start": 105,
+                "end": 112,
+                "filename": "files/tests/currying.rinha"
+              }
+            }
+          ],
+          "location": {
+            "start": 97,
+            "end": 113,
+            "filename": "files/tests/currying.rinha"
+          }
+        },
+        "next": {
+          "kind": "Print",
+          "value": {
+            "kind": "Binary",
+            "lhs": {
+              "kind": "Var",
+              "text": "x",
+              "location": {
+                "start": 121,
+                "end": 122,
+                "filename": "files/tests/currying.rinha"
+              }
+            },
+            "op": "Add",
+            "rhs": {
+              "kind": "Binary",
+              "lhs": {
+                "kind": "Str",
+                "value": " ",
+                "location": {
+                  "start": 125,
+                  "end": 128,
+                  "filename": "files/tests/currying.rinha"
+                }
+              },
+              "op": "Add",
+              "rhs": {
+                "kind": "Call",
+                "callee": {
+                  "kind": "Var",
+                  "text": "hello",
+                  "location": {
+                    "start": 131,
+                    "end": 136,
+                    "filename": "files/tests/currying.rinha"
+                  }
+                },
+                "arguments": [
+                  {
+                    "kind": "Str",
+                    "value": "Hina!",
+                    "location": {
+                      "start": 137,
+                      "end": 144,
+                      "filename": "files/tests/currying.rinha"
+                    }
+                  }
+                ],
+                "location": {
+                  "start": 131,
+                  "end": 145,
+                  "filename": "files/tests/currying.rinha"
+                }
+              },
+              "location": {
+                "start": 125,
+                "end": 145,
+                "filename": "files/tests/currying.rinha"
+              }
+            },
+            "location": {
+              "start": 121,
+              "end": 145,
+              "filename": "files/tests/currying.rinha"
+            }
+          },
+          "location": {
+            "start": 115,
+            "end": 146,
+            "filename": "files/tests/currying.rinha"
+          }
+        },
+        "location": {
+          "start": 85,
+          "end": 146,
+          "filename": "files/tests/currying.rinha"
+        }
+      },
+      "location": {
+        "start": 16,
+        "end": 146,
+        "filename": "files/tests/currying.rinha"
+      }
+    },
+    "location": {
+      "start": 0,
+      "end": 146,
+      "filename": "files/tests/currying.rinha"
+    }
+  },
+  "location": {
+    "start": 0,
+    "end": 146,
+    "filename": "files/tests/currying.rinha"
+  }
+}
