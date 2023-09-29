@@ -80,6 +80,7 @@ func (node FunctionTerm) String() string {
 }
 
 type CallTerm struct {
-	Arguments []Term
-	Callee    Term
+	FunctionCalled string
+	Arguments      []Term
+	Callee         Term
 }

@@ -76,6 +76,10 @@ func InspectNode(node Object) (Term, error) {
 func inspectCall(node Object) (CallTerm, error) {
 	argsNode, hasArgs := node["arguments"].([]interface{})
 	calleeNode, hasCallee := node["callee"].(map[string]interface{})
+	functionCalled, hasFunctionCalled := calleeNode["text"].(string)
+	if !hasFunctionCalled {
+		functionCalled = "anonymous"
+	}
 	if !hasArgs || !hasCallee {
 		return CallTerm{}, fmt.Errorf("'Call' node is badly structured")
 	}
@@ -88,7 +92,7 @@ func inspectCall(node Object) (CallTerm, error) {
 	if calleeInspectErr != nil {
 		return CallTerm{}, calleeInspectErr
 	}
-	return CallTerm{Arguments: args, Callee: callee}, nil
+	return CallTerm{FunctionCalled: functionCalled, Arguments: args, Callee: callee}, nil
 }
 
 func inspectCallArgs(argsNode []interface{}) ([]Term, error) {

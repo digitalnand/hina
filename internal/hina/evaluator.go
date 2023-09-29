@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strings"
+)
+
+var (
+	cache = make(map[string]Term)
 )
 
 func EvalTree(tree Object, env Environment) error {
@@ -249,17 +254,30 @@ func (ifTerm IfTerm) Eval(env Environment) (Term, error) {
 
 func (call CallTerm) insertArgs(function FunctionTerm, env Environment) error {
 	if len(function.Parameters) != len(call.Arguments) {
-		return fmt.Errorf("expected %d arguments, received %d", len(function.Parameters), len(call.Arguments))
+		return fmt.Errorf("%s expected %d arguments, received %d", call.FunctionCalled, len(function.Parameters), len(call.Arguments))
 	}
 	for index := 0; index < len(call.Arguments); index++ {
-		parameter := function.Parameters[index]
-		argument, err := evalTerm(call.Arguments[index], env)
+		param := function.Parameters[index]
+		arg, err := evalTerm(call.Arguments[index], env)
 		if err != nil {
 			return err
 		}
-		function.Env.Set(parameter, argument)
+		function.Env.Set(param, arg)
 	}
 	return nil
+}
+
+func genFunctionIdentifier(function FunctionTerm, call CallTerm) (string, error) {
+	arguments := []string{}
+	for _, param := range function.Parameters {
+		value, exists := function.Env.Get(param)
+		if !exists {
+			return "", fmt.Errorf("%s parameter doesn't exists in %s scope", param, call.FunctionCalled)
+		}
+		arguments = append(arguments, fmt.Sprint(value))
+	}
+	identifier := call.FunctionCalled + "(" + strings.Join(arguments, ", ") + ")"
+	return identifier, nil
 }
 
 func (call CallTerm) Eval(env Environment) (Term, error) {
@@ -279,9 +297,19 @@ func (call CallTerm) Eval(env Environment) (Term, error) {
 
 	newEnv := NewEnv()
 	newEnv.Copy(function.Env)
+
+	functionIdentifier, genErr := genFunctionIdentifier(function, call)
+	if genErr != nil {
+		return nil, genErr
+	}
+
+	if value, exists := cache[functionIdentifier]; exists {
+		return value, nil
+	}
 	result, resultEvalErr := evalTerm(function.Value, newEnv)
 	if resultEvalErr != nil {
 		return nil, resultEvalErr
 	}
+	cache[functionIdentifier] = result
 	return result, nil
 }
